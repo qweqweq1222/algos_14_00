@@ -6,6 +6,7 @@
 #include "list_1.h"
 int main(void)
 {
+/* qweqwe */
     int task = 0;
     lab618::CSingleLinkedList<int> List;
     while(task != 10)
