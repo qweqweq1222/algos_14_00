@@ -54,13 +54,8 @@ namespace lab618
 
             void operator++()
             {
-                if(this->isValid())
-                {
-                    if ((*(this->m_pCurrent)).pnext == nullptr)
-                        std::cout << "Last element" << std::endl;
-                    else
-                        this->m_pCurrent = ((*this).m_pCurrent)->pnext;
-                }
+                if(this->isValid() || ((*(this->m_pCurrent)).pnext == nullptr))
+                    this->m_pCurrent = ((*this).m_pCurrent)->pnext;
             }
 
             T& getData()
@@ -70,9 +65,7 @@ namespace lab618
 
             T& operator* ()
             {
-                T tmp;
-                tmp = (*this).m_pCurrent->data;
-                return tmp;
+                return (*this).m_pCurrent->data;
             }
 
             leaf* getLeaf()
@@ -91,7 +84,7 @@ namespace lab618
 
             bool isValid()
             {
-                if((this->m_pCurrent == nullptr))
+                if(this->m_pCurrent == nullptr)
                     return false;
                 else
                     return true;
@@ -115,44 +108,40 @@ namespace lab618
         virtual ~CSingleLinkedList()
         {
             leaf *buffer = nullptr;
-            while(m_pBegin != m_pEnd)
-            {
+            while(m_pBegin != m_pEnd) {
                 buffer = (*m_pBegin).pnext;
                 m_pBegin->~leaf();
                 m_pBegin = buffer;
             }
-            leaf v(0, nullptr);
-            m_pEnd = &v;
             m_pBegin->~leaf();
-            m_pEnd->~leaf();
         }
 
         void pushBack(T& data)
         {
-            leaf element(data, nullptr);
+            leaf *element = new leaf(data, nullptr);
             if(m_pBegin == nullptr && m_pEnd == nullptr)
             {
-                m_pBegin = &element;
-                m_pEnd  = &element;
+                m_pBegin = element;
+                m_pEnd  = element;
             }
             else
             {
-                (*m_pEnd).pnext = &element;
-                m_pEnd = &element;
+                (*m_pEnd).pnext = element;
+                m_pEnd = element;
             }
         }
 
         void pushFront(T& data)
         {
-            leaf element(data, nullptr);
+            leaf *element = new leaf(data, nullptr);
             if(m_pBegin == nullptr && m_pEnd == nullptr) {
-                m_pBegin = &element;
-                m_pEnd  = &element;
+                m_pBegin = element;
+                m_pEnd  = element;
             }
             else
             {
                 leaf *buffer= m_pBegin;
-                m_pBegin = &element;
+                m_pBegin = element;
                 (*m_pBegin).pnext = buffer;
             }
         }
@@ -249,7 +238,7 @@ namespace lab618
         CIterator begin()
         {
             CIterator it(this->m_pBegin);
-            return CIterator();
+            return it;
         }
 
     private:

@@ -9,6 +9,7 @@ int main(void)
 /* qweqwe */
     int task = 0;
     lab618::CSingleLinkedList<int> List;
+    /*
     while(task != 10)
     {
         std::cout <<"1 - push front " << std::endl <<  "2 - push back " << std::endl << "3 - clear " << std::endl <<  "4 - print " <<std::endl <<
@@ -43,5 +44,11 @@ int main(void)
                 break;
         }
     }
+     */
+    for(int i =0; i < 5; ++i)
+        List.pushFront(i);
+    List.print_list();
+    for(lab618::CSingleLinkedList<int>::CIterator it = List.begin(); it.isValid(); ++it)
+        std::cout << *it;
     return 0;
 }
