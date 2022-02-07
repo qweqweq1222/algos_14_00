@@ -27,6 +27,8 @@ namespace lab618
 
             CIterator(leaf *p)
             {
+                this->m_pBegin = p;
+                this->m_pCurrent = p;
             }
 
             CIterator(const CIterator &src)
@@ -47,11 +49,18 @@ namespace lab618
 
             bool operator != (const CIterator&  it) const
             {
-                return true;
+                return (it.m_pCurrent != this->m_pCurrent);
             }
 
             void operator++()
             {
+                if(this->isValid())
+                {
+                    if ((*(this->m_pCurrent)).pnext == nullptr)
+                        std::cout << "Last element" << std::endl;
+                    else
+                        this->m_pCurrent = ((*this).m_pCurrent)->pnext;
+                }
             }
 
             T& getData()
@@ -62,24 +71,30 @@ namespace lab618
             T& operator* ()
             {
                 T tmp;
+                tmp = (*this).m_pCurrent->data;
                 return tmp;
             }
 
             leaf* getLeaf()
             {
-                return 0;
+                return this->m_pCurrent;
             }
 
             void setLeaf(leaf* p)
             {
+
             }
 
             void setLeafPreBegin(leaf* p)
             {
             }
 
-            bool isValid() {
-                return false;
+            bool isValid()
+            {
+                if((this->m_pCurrent == nullptr))
+                    return false;
+                else
+                    return true;
             }
 
         private:
@@ -99,34 +114,45 @@ namespace lab618
 
         virtual ~CSingleLinkedList()
         {
+            leaf *buffer = nullptr;
+            while(m_pBegin != m_pEnd)
+            {
+                buffer = (*m_pBegin).pnext;
+                m_pBegin->~leaf();
+                m_pBegin = buffer;
+            }
+            leaf v(0, nullptr);
+            m_pEnd = &v;
+            m_pBegin->~leaf();
+            m_pEnd->~leaf();
         }
 
         void pushBack(T& data)
         {
-            leaf *element = new leaf(data, nullptr);
+            leaf element(data, nullptr);
             if(m_pBegin == nullptr && m_pEnd == nullptr)
             {
-                m_pBegin = element;
-                m_pEnd  = element;
+                m_pBegin = &element;
+                m_pEnd  = &element;
             }
             else
             {
-                (*m_pEnd).pnext = element;
-                m_pEnd = element;
+                (*m_pEnd).pnext = &element;
+                m_pEnd = &element;
             }
         }
 
         void pushFront(T& data)
         {
-            leaf *element = new leaf(data, nullptr);
+            leaf element(data, nullptr);
             if(m_pBegin == nullptr && m_pEnd == nullptr) {
-                m_pBegin = element;
-                m_pEnd  = element;
+                m_pBegin = &element;
+                m_pEnd  = &element;
             }
             else
             {
                 leaf *buffer= m_pBegin;
-                m_pBegin = element;
+                m_pBegin = &element;
                 (*m_pBegin).pnext = buffer;
             }
         }
@@ -146,11 +172,18 @@ namespace lab618
         T popFront()
         {
             T tmp;
-            if(m_pBegin != nullptr) {
+            if(m_pBegin != m_pEnd) {
                 tmp = (*m_pBegin).data;
                 leaf *buffer = (*m_pBegin).pnext;
                 m_pBegin->~leaf();
                 m_pBegin = buffer;
+            }
+            else if(m_pBegin == m_pEnd)
+            {
+                tmp = (*m_pBegin).data;
+                m_pBegin->~leaf();
+                m_pBegin = nullptr;
+                m_pEnd = nullptr;
             }
             else
                 std::cout << "List is empty" <<std::endl;
@@ -160,6 +193,28 @@ namespace lab618
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
+            if(this->m_pBegin = this->m_pEnd)
+            {
+                it.m_pCurrent->~leaf();
+                this->m_pBegin = nullptr;
+                this->m_pEnd = nullptr;
+            }
+            else if(this->m_pBegin == nullptr)
+                std::cout << "Nothing to erase" << std::endl;
+            else if(it.m_pCurrent == this->m_pEnd)
+            {
+                if(it.m_pBegin != this->m_pBegin)
+                    std::cout << "Error - no head pointer" << std::endl;
+                else
+                {
+                    leaf *buffer = this->m_pBegin;
+                    while(buffer->pnext != it.m_pCurrent)
+                        buffer = buffer->pnext;
+                    it.m_pCurrent->~leaf();
+                    this->m_pEnd = buffer;
+                    it.m_pCurrent = buffer;
+                }
+            }
         }
 
         int getSize()
@@ -176,9 +231,11 @@ namespace lab618
 
         void clear()
         {
-            if(m_pBegin != nullptr) {
-                leaf *buffer;
-                while (m_pBegin != nullptr) {
+            if(m_pBegin != nullptr)
+            {
+                leaf *buffer = nullptr;
+                while (m_pBegin != nullptr)
+                {
                     buffer = (*m_pBegin).pnext;
                     m_pBegin->~leaf();
                     m_pBegin = buffer;
@@ -191,6 +248,7 @@ namespace lab618
 
         CIterator begin()
         {
+            CIterator it(this->m_pBegin);
             return CIterator();
         }
 
