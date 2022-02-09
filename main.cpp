@@ -46,9 +46,10 @@ int main(void)
     }
      */
     for(int i =0; i < 5; ++i)
-        List.pushFront(i);
+        List.pushBack(i);
     List.print_list();
     for(lab618::CSingleLinkedList<int>::CIterator it = List.begin(); it.isValid(); ++it)
-        std::cout << *it;
+        List.erase(it);
+    List.print_list();
     return 0;
 }
