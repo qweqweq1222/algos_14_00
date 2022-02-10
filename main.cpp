@@ -35,6 +35,7 @@ void erase_even(lab618::CSingleLinkedList<my_struct> &List)
     }
     print(List);
 }
+
 int main(void)
 {
     lab618::CSingleLinkedList<my_struct> List;
