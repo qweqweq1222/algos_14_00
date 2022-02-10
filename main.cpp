@@ -32,7 +32,6 @@ void erase_even(lab618::CSingleLinkedList<my_struct> &List)
         if( i % 2 == 0)
             List.erase(it);
         i--;
-        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
     }
     print(List);
 }
