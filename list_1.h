@@ -18,6 +18,7 @@ namespace lab618
             T data;
             leaf * pnext;
             leaf(T& _data, leaf * _pnext): data(_data), pnext(_pnext){ }
+            ~leaf() = default;
         };
     public:
         class CIterator
@@ -37,9 +38,7 @@ namespace lab618
                 m_pCurrent = src.m_pCurrent;
             }
 
-            ~CIterator()
-            {
-            }
+            ~CIterator()=default;
 
             CIterator& operator = (const CIterator&  src)
             {
@@ -80,6 +79,10 @@ namespace lab618
 
             void setLeafPreBegin(leaf* p)
             {
+                leaf *buffer = new leaf(m_pBegin->data, m_pBegin->pnext);
+                this->m_pBegin = m_pBegin->pnext;
+                this->m_pCurrent = buffer;
+                delete buffer;
             }
 
             bool isValid()
@@ -145,18 +148,6 @@ namespace lab618
                 (*m_pBegin).pnext = buffer;
             }
         }
-        void print_list()
-        {
-            leaf *l = m_pBegin;
-            if(l == nullptr)
-                std::cout<< "list is empty" << std::endl;
-            while(l)
-            {
-                std::cout << l->data << " ";
-                l = l->pnext;
-            }
-            std::cout << std::endl;
-        }
 
         T popFront()
         {
@@ -166,7 +157,7 @@ namespace lab618
                 tmp = (*m_pBegin).data;
                 buffer = m_pBegin;
                 m_pBegin = (*m_pBegin).pnext;
-                delete buffer;
+                buffer->~leaf();
             }
             else if(m_pBegin == m_pEnd)
             {
@@ -174,7 +165,7 @@ namespace lab618
                 buffer = m_pBegin;
                 m_pBegin = nullptr;
                 m_pEnd = nullptr;
-                delete buffer;
+                buffer->~leaf();
             }
             else
                 std::cout << "List is empty" <<std::endl;
@@ -184,27 +175,41 @@ namespace lab618
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
-            if(this->m_pBegin == this->m_pEnd)
+            if(this->m_pBegin == it.getLeaf())
             {
-                it.getLeaf()->~leaf();
-                this->m_pBegin = nullptr;
-                this->m_pEnd = nullptr;
-            }
-            else if(this->m_pBegin == nullptr)
-                std::cout << "Nothing to erase" << std::endl;
-            else
-            {
-                if(it.getLeaf() != this->m_pBegin)
-                    std::cout << "Error - no head pointer" << std::endl;
+                if (this->m_pBegin == this->m_pEnd && this->m_pBegin != nullptr)
+                {
+                    it.setLeafPreBegin(this->m_pBegin);
+                    m_pBegin->~leaf();
+                    m_pBegin = nullptr;
+                    m_pEnd = nullptr;
+                }
+                else if (this->m_pBegin == nullptr) {
+                    try {
+                        throw 55;
+                    } catch (int n) {
+                        std::cout << "list is  empty - can't erase. Exit status 55 \n";
+                        exit(n);
+                    }
+                }
                 else
                 {
-                    leaf *buffer = this->m_pBegin;
-                    while(buffer->pnext != it.getLeaf() && buffer != it.getLeaf())
-                        buffer = buffer->pnext;
-                    it.getLeaf()->~leaf();
-                    this->m_pEnd = buffer;
-                    it.setLeaf(buffer);
+                    it.setLeafPreBegin(this->m_pBegin);
+                    m_pBegin->~leaf();
+                    m_pBegin = it.getLeaf()->pnext;
                 }
+            }
+
+            else
+            {
+                leaf *buffer = this->m_pBegin;
+                while(buffer->pnext != it.getLeaf() && buffer != it.getLeaf())
+                    buffer = buffer->pnext;
+                (*buffer).pnext = it.getLeaf()->pnext;
+                if(it.getLeaf() == this->m_pEnd)
+                    this->m_pEnd = buffer;
+                it.getLeaf()->~leaf();
+                it.setLeaf(buffer);
             }
         }
 
