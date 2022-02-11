@@ -59,7 +59,7 @@ namespace lab618
 
             T& getData()
             {
-                return T();
+                return (*this).m_pCurrent->data;;
             }
 
             T& operator* ()
@@ -79,18 +79,24 @@ namespace lab618
 
             void setLeafPreBegin(leaf* p)
             {
-                leaf *buffer = new leaf(m_pBegin->data, m_pBegin->pnext);
-                this->m_pBegin = m_pBegin->pnext;
-                this->m_pCurrent = buffer;
-                delete buffer;
+                if(p != nullptr && p->pnext != nullptr)
+                {
+                    leaf *buffer = new leaf(p->data, p->pnext);
+                    this->m_pBegin = p->pnext;
+                    this->m_pCurrent = buffer;
+                }
+                else if(p->pnext == nullptr)  //отдельно рассматривается случай когда удаляем последний элемент.
+                {
+                    leaf *buffer = new leaf(p->data, nullptr);
+                    this->m_pBegin = nullptr;
+                    this->m_pCurrent = buffer;
+                }
+                else
+                    std::cout << "nothing to erase\n";
             }
 
-            bool isValid()
-            {
-                if(this->m_pCurrent == nullptr)
-                    return false;
-                else
-                    return true;
+            bool isValid(){
+                return (this->m_pCurrent == nullptr)? false : true;
             }
 
         private:
@@ -110,13 +116,13 @@ namespace lab618
 
         virtual ~CSingleLinkedList()
         {
-            leaf *buffer = nullptr;
             while(m_pBegin != m_pEnd) {
-                buffer = (*m_pBegin).pnext;
-                m_pBegin->~leaf();
-                m_pBegin = buffer;
+                this->popFront();
             }
-            m_pBegin->~leaf();
+            leaf *buffer = m_pBegin;
+            m_pBegin = nullptr;
+            m_pEnd = nullptr;
+            delete buffer;
         }
 
         void pushBack(T& data)
@@ -151,38 +157,45 @@ namespace lab618
 
         T popFront()
         {
-            T tmp;
-            leaf *buffer = nullptr;
+            T tmp = T();
             if(m_pBegin != m_pEnd) {
+                leaf *buffer = m_pBegin;
                 tmp = (*m_pBegin).data;
-                buffer = m_pBegin;
-                m_pBegin = (*m_pBegin).pnext;
-                buffer->~leaf();
+                m_pBegin = m_pBegin->pnext;
+                delete buffer;
+                return tmp;
             }
             else if(m_pBegin == m_pEnd)
             {
-                tmp = (*m_pBegin).data;
-                buffer = m_pBegin;
-                m_pBegin = nullptr;
-                m_pEnd = nullptr;
-                buffer->~leaf();
+                if (m_pBegin != nullptr) {
+                    leaf *buffer = m_pBegin;
+                    tmp = (*m_pBegin).data;
+                    m_pBegin = nullptr;
+                    m_pEnd = nullptr;
+                    delete buffer;
+                    return tmp;
+                }
+                else {
+                    std::cout << "list is already empty\n";
+                    return tmp;
+                }
             }
-            else
-                std::cout << "List is empty" <<std::endl;
             return tmp;
         }
 
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
+            leaf *buffer = this->m_pBegin;
+            bool a = it.isValid();
             if(this->m_pBegin == it.getLeaf())
             {
                 if (this->m_pBegin == this->m_pEnd && this->m_pBegin != nullptr)
                 {
                     it.setLeafPreBegin(this->m_pBegin);
-                    m_pBegin->~leaf();
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
+                    delete buffer;
                 }
                 else if (this->m_pBegin == nullptr) {
                     try {
@@ -195,21 +208,29 @@ namespace lab618
                 else
                 {
                     it.setLeafPreBegin(this->m_pBegin);
-                    m_pBegin->~leaf();
-                    m_pBegin = it.getLeaf()->pnext;
+                    m_pBegin = m_pBegin->pnext;
+                    delete buffer;
                 }
             }
 
             else
             {
-                leaf *buffer = this->m_pBegin;
                 while(buffer->pnext != it.getLeaf() && buffer != it.getLeaf())
                     buffer = buffer->pnext;
-                (*buffer).pnext = it.getLeaf()->pnext;
                 if(it.getLeaf() == this->m_pEnd)
+                {
                     this->m_pEnd = buffer;
-                it.getLeaf()->~leaf();
-                it.setLeaf(buffer);
+                    buffer = buffer->pnext;
+                    delete buffer;
+                }
+                else
+                {
+                    leaf *buffer_ = buffer->pnext;
+                    buffer->pnext = it.getLeaf()->pnext;
+                    it.setLeaf(buffer);
+                    buffer = buffer_;
+                    delete buffer;
+                }
             }
         }
 
@@ -227,23 +248,8 @@ namespace lab618
 
         void clear()
         {
-            if(m_pBegin != nullptr)
-            {
-                leaf *alternative = nullptr;
-                while (m_pBegin != m_pEnd)
-                {
-                    alternative = m_pBegin;
-                    m_pBegin = (*m_pBegin).pnext;
-                    alternative->~leaf();
-                    alternative = m_pBegin;
-                }
-                alternative = m_pBegin;
-                m_pBegin = nullptr;
-                m_pEnd = nullptr;
-                delete alternative;
-            }
-            else
-                std::cout<<"List is already clear" << std::endl;
+            while(this->m_pBegin != nullptr)
+                this->popFront();
         }
 
         CIterator begin()
