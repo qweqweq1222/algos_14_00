@@ -107,6 +107,7 @@ void erase_empty()
 }
 int main(void)
 {
+    //comment
     lab618::CDualLinkedList<my_struct> list;
     full_dual(list,4);
     erase_something_back(list);
