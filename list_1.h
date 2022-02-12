@@ -58,7 +58,7 @@ namespace lab618
                 else if(m_pCurrent == nullptr && m_pBegin != nullptr)
                     m_pCurrent = m_pBegin;
                 else
-                    throw std::out_of_range("message");
+                    throw std::out_of_range("can not iterate throw empty list");
             }
 
             T& getData()
@@ -184,7 +184,7 @@ namespace lab618
                     delete buffer;
                 }
                 else if(m_pBegin == nullptr)
-                    throw std::out_of_range("message");
+                    throw std::out_of_range("can not erase empty list");
                 else
                 {
                     buffer = m_pBegin;
@@ -308,7 +308,7 @@ namespace lab618
                 else if(m_pCurrent == nullptr && m_pBegin != nullptr)
                     m_pCurrent = m_pBegin;
                 else
-                    throw std::out_of_range("message");
+                    throw std::out_of_range("can not iterate throw empty list");
             }
 
             void operator--()
@@ -318,7 +318,7 @@ namespace lab618
                 else if(m_pCurrent == nullptr && m_pEnd != nullptr)
                     m_pCurrent = m_pEnd;
                 else
-                    throw std::out_of_range("message");
+                    throw std::out_of_range("can not iterate throw empty list");
             }
 
             T& getData()
@@ -510,7 +510,7 @@ namespace lab618
                     delete buffer;
                 }
                 else if( m_pBegin == nullptr)
-                    throw std::out_of_range("message");
+                    throw std::out_of_range("can not erase throw empty list");
                 else
                 {
                     buffer = m_pBegin;

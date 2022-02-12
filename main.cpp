@@ -108,8 +108,13 @@ void erase_empty()
 int main(void)
 {
     //comment
-    lab618::CDualLinkedList<my_struct> list;
-    full_dual(list,4);
-    erase_something_back(list);
+    lab618::CSingleLinkedList<my_struct> list;
+    full(list,10);
+    print(list);
+    std::cout << "SIZE:" << list.getSize() << std::endl;
+    erase_something(list);
+    print(list);
+    std::cout << "SIZE:" << list.getSize() << std::endl;
+    pop_nothing();
     return 0;
 }
