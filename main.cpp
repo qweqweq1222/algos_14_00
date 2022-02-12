@@ -109,8 +109,6 @@ int main(void)
 {
     lab618::CDualLinkedList<my_struct> list;
     full_dual(list,4);
-    print_dual(list);
     erase_something_back(list);
-    print_dual(list);
     return 0;
 }

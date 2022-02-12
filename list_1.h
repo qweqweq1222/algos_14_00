@@ -27,7 +27,7 @@ namespace lab618
 
             CIterator(leaf *p)
             {
-                m_pBegin = p;
+                m_pBegin = nullptr;
                 m_pCurrent = p;
             }
 
@@ -232,17 +232,19 @@ namespace lab618
 
         void clear()
         {
-            leaf *runner = nullptr;
-            while(m_pBegin != m_pEnd)
+            if(m_pBegin != nullptr)
             {
+                leaf *runner = nullptr;
+                while (m_pBegin != m_pEnd) {
+                    runner = m_pBegin;
+                    m_pBegin = m_pBegin->pnext;
+                    delete runner;
+                }
                 runner = m_pBegin;
-                m_pBegin = m_pBegin->pnext;
-                delete runner;
+                m_pBegin = nullptr;
+                m_pEnd = nullptr;
+                delete m_pBegin;
             }
-            runner = m_pBegin;
-            m_pBegin = nullptr;
-            m_pEnd = nullptr;
-            delete m_pBegin;
         }
 
         CIterator begin()
@@ -272,9 +274,9 @@ namespace lab618
 
             CIterator(leaf *p)
             {
-                m_pBegin = p;
+                m_pBegin = nullptr;
                 m_pCurrent = p;
-                m_pEnd = p;
+                m_pEnd = nullptr;
             }
 
             CIterator(const CIterator &src)
@@ -313,7 +315,7 @@ namespace lab618
             {
                 if(m_pCurrent != nullptr && (isValid() || (m_pCurrent->pprev == nullptr)))
                     m_pCurrent = m_pCurrent->pprev;
-                else if(m_pCurrent == nullptr && m_pBegin != nullptr)
+                else if(m_pCurrent == nullptr && m_pEnd != nullptr)
                     m_pCurrent = m_pEnd;
                 else
                     throw std::out_of_range("message");
@@ -556,17 +558,19 @@ namespace lab618
 
         void clear()
         {
-            leaf *runner = nullptr;
-            while(m_pBegin != m_pEnd)
+            if(m_pBegin != nullptr)
             {
+                leaf *runner = nullptr;
+                while (m_pBegin != m_pEnd) {
+                    runner = m_pBegin;
+                    m_pBegin = m_pBegin->pnext;
+                    delete runner;
+                }
                 runner = m_pBegin;
-                m_pBegin = m_pBegin->pnext;
-                delete runner;
+                m_pBegin = nullptr;
+                m_pEnd = nullptr;
+                delete m_pBegin;
             }
-            runner = m_pBegin;
-            m_pBegin = nullptr;
-            m_pEnd = nullptr;
-            delete m_pBegin;
         }
 
         CIterator begin()
