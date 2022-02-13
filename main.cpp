@@ -3,7 +3,7 @@
 
 #endif //#ifndef TEMPLATES_LIST_2022_02_03
 #include<iostream>
-#include "list_1.h"
+#include "list.h"
 #include <random>
 
 // генерация рандомных строк
@@ -105,16 +105,19 @@ void erase_empty()
     lab618::CSingleLinkedList<my_struct>::CIterator it = List.begin();
     List.erase(it);
 }
+void pop_end(lab618::CDualLinkedList<my_struct> &list)
+{
+    for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
+        list.popFront();
+}
 int main(void)
 {
     //comment
-    lab618::CSingleLinkedList<my_struct> list;
-    full(list,10);
-    print(list);
-    std::cout << "SIZE:" << list.getSize() << std::endl;
-    erase_something(list);
-    print(list);
-    std::cout << "SIZE:" << list.getSize() << std::endl;
-    pop_nothing();
+    erase_empty();
+    lab618::CDualLinkedList<my_struct> list;
+    full_dual(list,5);
+    print_dual(list);
+    pop_end(list);
+    print_dual(list);
     return 0;
 }

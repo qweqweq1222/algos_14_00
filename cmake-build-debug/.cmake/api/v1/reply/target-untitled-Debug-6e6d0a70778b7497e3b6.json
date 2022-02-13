@@ -106,7 +106,7 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "list_1.h",
+			"path" : "list.h",
 			"sourceGroupIndex" : 1
 		}
 	],
