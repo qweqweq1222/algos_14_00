@@ -502,7 +502,7 @@ namespace lab618
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
                     buffer = m_pBegin;
-                    it.setLeafPreBegin(nullptr);
+                    it.setLeafPostEnd(nullptr);
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
                     delete buffer;

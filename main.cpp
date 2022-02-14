@@ -117,8 +117,8 @@ int main(void)
     erase_empty();
     lab618::CDualLinkedList<my_struct> list;
     full_dual(list, 3);
-    for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
-        list.popFront();
+    for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it)
+        list.eraseAndNext(it);
     list.pushFront(s);
     print_dual(list);
     return 0;
