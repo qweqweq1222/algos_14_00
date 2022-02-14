@@ -113,11 +113,13 @@ void pop_end(lab618::CDualLinkedList<my_struct> &list)
 int main(void)
 {
     //comment
+    my_struct s = my_struct();
     erase_empty();
     lab618::CDualLinkedList<my_struct> list;
-    full_dual(list,5);
-    print_dual(list);
-    pop_end(list);
+    full_dual(list, 3);
+    for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
+        list.popFront();
+    list.pushFront(s);
     print_dual(list);
     return 0;
 }

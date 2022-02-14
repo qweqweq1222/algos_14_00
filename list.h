@@ -57,14 +57,6 @@ namespace lab618
                     m_pCurrent = m_pCurrent->pnext;
                 else if(m_pCurrent == nullptr && m_pBegin != nullptr)
                     m_pCurrent = m_pBegin;
-                else
-                    try {
-                        throw std::out_of_range("can not ++ empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout << "can not ++ empty list" <<std::endl;
-                    }
             }
 
             T& getData()
@@ -159,23 +151,14 @@ namespace lab618
             }
             else if(m_pBegin == m_pEnd)
             {
-                if (m_pBegin != nullptr) {
+                if (m_pBegin != nullptr)
+                {
                     leaf *buffer = m_pBegin;
                     tmp = m_pBegin->data;
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
                     delete buffer;
                     return tmp;
-                }
-                else {
-                    try {
-                        throw std::out_of_range("empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout<<"empty list" <<std::endl;
-                        return tmp = T();
-                    }
                 }
             }
             return tmp;
@@ -195,15 +178,7 @@ namespace lab618
                     m_pEnd = nullptr;
                     delete buffer;
                 }
-                else if(m_pBegin == nullptr)
-                    try {
-                        throw std::out_of_range("can not erase empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout << "can not erase empty list" <<std::endl;
-                    }
-                else
+                else if (m_pBegin != m_pEnd)
                 {
                     buffer = m_pBegin;
                     m_pBegin = m_pBegin->pnext;
@@ -325,14 +300,6 @@ namespace lab618
                     m_pCurrent = m_pCurrent->pnext;
                 else if(m_pCurrent == nullptr && m_pBegin != nullptr)
                     m_pCurrent = m_pBegin;
-                else
-                    try {
-                        throw std::out_of_range("can not ++ empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout << "can not ++ empty list" <<std::endl;
-                    }
             }
 
             void operator--()
@@ -341,14 +308,6 @@ namespace lab618
                     m_pCurrent = m_pCurrent->pprev;
                 else if(m_pCurrent == nullptr && m_pEnd != nullptr)
                     m_pCurrent = m_pEnd;
-                else
-                    try {
-                        throw std::out_of_range("can not -- empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout << "can not -- empty list" <<std::endl;
-                    }
             }
 
             T& getData()
@@ -451,8 +410,16 @@ namespace lab618
         void pushFront(T& data)
         {
             leaf *element = new leaf(data, nullptr, m_pBegin);
-            m_pBegin->pprev = element;
-            m_pBegin = element;
+            if(m_pBegin == nullptr && m_pEnd == nullptr)
+            {
+                m_pBegin = element;
+                m_pEnd = element;
+            }
+            else
+            {
+                m_pBegin->pprev = element;
+                m_pBegin = element;
+            }
         }
 
         T popFront()
@@ -468,19 +435,7 @@ namespace lab618
                 delete buffer;
                 return tmp;
             }
-            else if(m_pBegin == nullptr)
-            {
-                try
-                {
-                    throw std::out_of_range("empty list");
-                }
-                catch(std::out_of_range)
-                {
-                    std::cout<<"empty list" <<std::endl;
-                    return tmp = T();
-                }
-            }
-            else
+            else if (m_pBegin == m_pEnd)
             {
                 tmp = m_pBegin->data;
                 buffer = m_pBegin;
@@ -505,15 +460,7 @@ namespace lab618
                     m_pEnd = nullptr;
                     delete buffer;
                 }
-                else if(m_pBegin == nullptr)
-                    try {
-                        throw std::out_of_range("can not erase empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout << "can not erase empty list" <<std::endl;
-                    }
-                else
+                else if(m_pBegin != m_pEnd)
                 {
                     buffer = m_pBegin;
                     m_pBegin = m_pBegin->pnext;
@@ -560,15 +507,7 @@ namespace lab618
                     m_pEnd = nullptr;
                     delete buffer;
                 }
-                else if( m_pBegin == nullptr)
-                    try {
-                        throw std::out_of_range("can not erase empty list");
-                    }
-                    catch(std::out_of_range)
-                    {
-                        std::cout << "can not erase empty list" <<std::endl;
-                    }
-                else
+                else if(m_pBegin != m_pEnd)
                 {
                     buffer = m_pBegin;
                     m_pBegin = m_pBegin->pnext;
