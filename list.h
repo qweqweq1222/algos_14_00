@@ -185,15 +185,16 @@ namespace lab618
                 while(buffer->pnext != it.getLeaf())
                     buffer = buffer->pnext;
                 leaf* buffer_ = it.getLeaf();
-                it.setLeaf(buffer);
                 if(it.getLeaf() == m_pEnd)
                 {
+                    it.setLeaf(buffer);
                     buffer->pnext = nullptr;
                     m_pEnd = buffer;
                 }
                 else
                 {
                     buffer->pnext = it.getLeaf()->pnext;
+                    it.setLeaf(buffer);
                 }
                 buffer = buffer_;
             }

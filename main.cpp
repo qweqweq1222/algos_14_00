@@ -114,12 +114,40 @@ int main(void)
 {
     //comment
     my_struct s = my_struct();
-    erase_empty();
-    lab618::CDualLinkedList<my_struct> list;
-    full_dual(list, 3);
-    for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it)
+    lab618::CSingleLinkedList<my_struct> list;
+    full(list, 3);
+    for(lab618::CSingleLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
+    {
+        list.popFront();
+        std::cout << list.getSize() << std::endl;
+    }
+    full(list, 3);
+    for(lab618::CSingleLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
+    {
         list.erase(it);
-    list.pushFront(s);
-    print_dual(list);
+        std::cout << list.getSize() << std::endl;
+    }
+    full(list, 3);
+    lab618::CSingleLinkedList<my_struct>::CIterator it = list.begin();
+    ++it;
+    for(; it.isValid(); ++it)
+    {
+        list.erase(it);
+        std::cout << list.getSize() << std::endl;
+    }
+    std::cout << list.getSize() << std::endl;
+    print(list);
+
+    lab618::CDualLinkedList<my_struct> list_d;
+    full_dual(list_d, 3);
+    lab618::CDualLinkedList<my_struct>::CIterator iter = list_d.end();
+    ++iter;
+    for(; iter.isValid(); --iter)
+    {
+        list_d.eraseAndNext(iter);
+        std::cout << list.getSize() << std::endl;
+    }
+    std::cout << list.getSize() << std::endl;
+    print(list);
     return 0;
 }
