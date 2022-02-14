@@ -141,13 +141,12 @@ namespace lab618
 
         T popFront()
         {
-            T tmp;
-            if(m_pBegin != m_pEnd) {
+            T tmp = m_pBegin->data;
+            if(m_pBegin != m_pEnd)
+            {
                 leaf *buffer = m_pBegin;
-                tmp = m_pBegin->data;
                 m_pBegin = m_pBegin->pnext;
                 delete buffer;
-                return tmp;
             }
             else if(m_pBegin == m_pEnd)
             {
@@ -158,7 +157,6 @@ namespace lab618
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
                     delete buffer;
-                    return tmp;
                 }
             }
             return tmp;
@@ -167,48 +165,39 @@ namespace lab618
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
-            leaf *buffer = nullptr;
+            leaf *buffer = m_pBegin;
             if(it.getLeaf() == m_pBegin)
             {
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
-                    buffer = m_pBegin;
                     it.setLeafPreBegin(nullptr);
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
-                    delete buffer;
                 }
                 else if (m_pBegin != m_pEnd)
                 {
-                    buffer = m_pBegin;
                     m_pBegin = m_pBegin->pnext;
                     it.setLeafPreBegin(m_pBegin);
-                    delete buffer;
                 }
             }
             else
             {
-                buffer = m_pBegin;
                 while(buffer->pnext != it.getLeaf())
                     buffer = buffer->pnext;
+                leaf* buffer_ = it.getLeaf();
+                it.setLeaf(buffer);
                 if(it.getLeaf() == m_pEnd)
                 {
-                    leaf *buffer_ = it.getLeaf();
                     buffer->pnext = nullptr;
-                    it.setLeaf(buffer);
                     m_pEnd = buffer;
-                    buffer = buffer_;
-                    delete buffer;
                 }
                 else
                 {
-                    leaf* buffer_ = it.getLeaf();
                     buffer->pnext = it.getLeaf()->pnext;
-                    it.setLeaf(buffer);
-                    buffer = buffer_;
-                    delete buffer;
                 }
+                buffer = buffer_;
             }
+            delete buffer;
         }
 
         int getSize()
@@ -424,73 +413,59 @@ namespace lab618
 
         T popFront()
         {
-            leaf *buffer = nullptr;
-            T tmp;
+            leaf *buffer = m_pBegin;
+            T tmp = m_pBegin->data;;
             if(m_pBegin !=m_pEnd)
             {
-                tmp = m_pBegin->data;
-                m_pBegin->pnext->pprev = nullptr;
-                buffer = m_pBegin;
                 m_pBegin = m_pBegin->pnext;
-                delete buffer;
-                return tmp;
+                m_pBegin->pprev = nullptr;
             }
-            else if (m_pBegin == m_pEnd)
+            else
             {
-                tmp = m_pBegin->data;
-                buffer = m_pBegin;
                 m_pBegin = nullptr;
                 m_pEnd = nullptr;
-                delete buffer;
             }
+            delete buffer;
             return tmp;
         }
 
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
-            leaf *buffer = nullptr;
+            leaf *buffer = m_pBegin;
             if(it.getLeaf() == m_pBegin)
             {
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
-                    buffer = m_pBegin;
                     it.setLeafPreBegin(nullptr);
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
-                    delete buffer;
                 }
-                else if(m_pBegin != m_pEnd)
+                else
                 {
-                    buffer = m_pBegin;
                     m_pBegin = m_pBegin->pnext;
                     it.setLeafPreBegin(m_pBegin);
-                    delete buffer;
                 }
             }
             else
             {
-                buffer = m_pBegin;
                 while(buffer->pnext != it.getLeaf())
                     buffer = buffer->pnext;
+                leaf *buffer_ = it.getLeaf();
                 if(it.getLeaf() == m_pEnd)
                 {
-                    leaf *buffer_ = it.getLeaf();
                     buffer->pnext = nullptr;
-                    it.setLeaf(buffer);
+                    it.setLeaf(buffer_);
                     m_pEnd = buffer;
-                    buffer = buffer_;
-                    delete buffer;
                 }
                 else
                 {
-                    leaf* buffer_ = it.getLeaf();
                     buffer->pnext = it.getLeaf()->pnext;
                     it.setLeaf(buffer);
-                    buffer = buffer_;
-                    delete buffer;
                 }
+                buffer = buffer_;
             }
+            delete buffer;
         }
 
         // изменяет состояние итератора. выставляет следующую позицию.
@@ -499,21 +474,18 @@ namespace lab618
             leaf *buffer = nullptr;
             if(it.getLeaf() == m_pBegin)
             {
+                buffer = m_pBegin;
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
-                    buffer = m_pBegin;
                     it.setLeafPostEnd(nullptr);
                     m_pBegin = nullptr;
                     m_pEnd = nullptr;
-                    delete buffer;
                 }
-                else if(m_pBegin != m_pEnd)
+                else
                 {
-                    buffer = m_pBegin;
                     m_pBegin = m_pBegin->pnext;
                     m_pBegin->pprev = nullptr;
                     it.setLeafPreBegin(m_pBegin);
-                    delete buffer;
                 }
             }
             else
@@ -526,7 +498,6 @@ namespace lab618
                     m_pEnd = m_pEnd->pprev;
                     m_pEnd->pnext = nullptr;
                     it.setLeafPostEnd(m_pEnd);
-                    delete buffer;
                 }
                 else
                 {
@@ -535,9 +506,9 @@ namespace lab618
                     it.getLeaf()->pprev->pnext = buffer;
                     it.setLeaf(buffer);
                     buffer = buffer_;
-                    delete buffer;
                 }
             }
+            delete buffer;
         }
 
         int getSize()
