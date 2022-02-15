@@ -4,4 +4,4 @@ project(untitled)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(untitled main.cpp list.h)
+add_executable(untitled main.cpp list.h doctest.h)

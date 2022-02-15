@@ -286,7 +286,7 @@ namespace lab618
 
             void operator++()
             {
-                if(m_pCurrent != nullptr && (isValid() || (m_pCurrent->pnext == nullptr)))
+                if(m_pCurrent != nullptr)
                     m_pCurrent = m_pCurrent->pnext;
                 else if(m_pCurrent == nullptr && m_pBegin != nullptr)
                     m_pCurrent = m_pBegin;
@@ -333,6 +333,7 @@ namespace lab618
             {
                 m_pEnd = p;
                 m_pCurrent = nullptr;
+                m_pBegin = nullptr;
             }
 
             bool isValid(){
@@ -378,21 +379,22 @@ namespace lab618
 
         T popBack()
         {
-            T tmp = m_pEnd->data;
-            leaf *buffer = nullptr;
-            if(m_pBegin != m_pEnd)
+            T tmp = T();
+            if(m_pBegin != nullptr)
             {
-                (*m_pEnd->pprev).pnext = nullptr;
-                buffer = m_pEnd;
-                m_pEnd = m_pEnd->pprev;
-                delete buffer;
-            }
-            else
-            {
-                buffer = m_pEnd;
-                m_pEnd = nullptr;
-                m_pBegin = nullptr;
-                delete buffer;
+                tmp = m_pEnd->data;
+                leaf *buffer = nullptr;
+                if (m_pBegin != m_pEnd) {
+                    (*m_pEnd->pprev).pnext = nullptr;
+                    buffer = m_pEnd;
+                    m_pEnd = m_pEnd->pprev;
+                    delete buffer;
+                } else {
+                    buffer = m_pEnd;
+                    m_pEnd = nullptr;
+                    m_pBegin = nullptr;
+                    delete buffer;
+                }
             }
             return tmp;
         }

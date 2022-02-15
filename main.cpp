@@ -1,7 +1,5 @@
-#ifndef TEMPLATES_LIST_2022_02_03
-#define TEMPLATES_LIST_2022_02_03
-
-#endif //#ifndef TEMPLATES_LIST_2022_02_03
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 #include<iostream>
 #include "list.h"
 #include <random>
@@ -47,7 +45,6 @@ void print_dual(lab618::CDualLinkedList<my_struct>  &List)
         std::cout << "(" << (*it).str << ", " << it.getData().val << ")\n";
     std::cout << std::endl;
 }
-//функция заполнения
 void full(lab618::CSingleLinkedList<my_struct> &List, int N)
 {
     my_struct s;
@@ -66,88 +63,89 @@ void full_dual(lab618::CDualLinkedList<my_struct>  &List, int N)
         List.pushBack(s);
     }
 }
-/* удаление четных элементов списка (проверка работы erase - из-за четности проверяется случай удаления головы)*/
-void erase_something(lab618::CSingleLinkedList<my_struct> &List)
+
+TEST_SUITE("dual_erase")
 {
-    int i =0;
-    for(lab618::CSingleLinkedList<my_struct>::CIterator it = List.begin(); it.isValid(); ++it)
+    lab618::CDualLinkedList<my_struct> list;
+    TEST_CASE("erase_begin_end")
     {
-        if(i % 2 == 0)
-            List.erase(it);
-        ++i;
+        full_dual(list,5);
+        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it) {
+            std::cout << list.getSize() << ' ';
+            list.erase(it);
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 0);
     }
-}
-// удаление четных элементов, но уже с реверс-итератором
-void erase_something_back(lab618::CDualLinkedList<my_struct> &List)
-{
-    int i =0;
-    for(lab618::CDualLinkedList<my_struct>::CIterator it = List.end(); it.isValid(); --it)
+    TEST_CASE("erase_end_begin")
     {
-        if(i % 2 == 0)
-            List.eraseAndNext(it);
-        ++i;
+        full_dual(list,5);
+        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it) {
+            std::cout << list.getSize() << ' ';
+            list.erase(it);
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 0);
+    }
+    TEST_CASE("eraseAndNext_begin_end")
+    {
+        full_dual(list,5);
+        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it) {
+            std::cout << list.getSize() << ' ';
+            list.eraseAndNext(it);
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 0);
+    }
+    TEST_CASE("eraseAndNext_end_begin")
+    {
+        full_dual(list,5);
+        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it) {
+            std::cout << list.getSize() << ' ';
+            list.eraseAndNext(it);
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 0);
+    }
+    TEST_CASE("erase_middle")
+    {
+        full_dual(list,5);
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        ++it;
+        ++it;
+        for(it; it.isValid(); ++it) {
+            std::cout << list.getSize() << ' ';
+            list.erase(it);
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 2);
+    }
+    TEST_CASE("eraseAndNext_middle")
+    {
+        full_dual(list,5);
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        ++it;
+        ++it;
+        int size = list.getSize();
+        for(it; it.isValid(); ++it) {
+            list.eraseAndNext(it);
+            size = list.getSize();
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 4);
     }
 }
 
-// достать из пустого списка
-void pop_nothing()
+/*int main(void)
 {
-    lab618::CSingleLinkedList<my_struct> List;
-    full(List, 10);
-    List.clear();
-    List.popFront();
-}
-
-// erase по пустому списку
-void erase_empty()
-{
-    lab618::CSingleLinkedList<my_struct> List;
-    lab618::CSingleLinkedList<my_struct>::CIterator it = List.begin();
-    List.erase(it);
-}
-void pop_end(lab618::CDualLinkedList<my_struct> &list)
-{
-    for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
-        list.popFront();
-}
-int main(void)
-{
-    //comment
-    my_struct s = my_struct();
-    lab618::CSingleLinkedList<my_struct> list;
-    full(list, 3);
-    for(lab618::CSingleLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
-    {
-        list.popFront();
-        std::cout << list.getSize() << std::endl;
-    }
-    full(list, 3);
-    for(lab618::CSingleLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it)
-    {
-        list.erase(it);
-        std::cout << list.getSize() << std::endl;
-    }
-    full(list, 3);
-    lab618::CSingleLinkedList<my_struct>::CIterator it = list.begin();
+    lab618::CDualLinkedList<my_struct> list;
+    full_dual(list,5);
+    lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
     ++it;
-    for(; it.isValid(); ++it)
-    {
-        list.erase(it);
-        std::cout << list.getSize() << std::endl;
+    ++it;
+    for(it; it.isValid(); ++it) {
+        list.eraseAndNext(it);
     }
-    std::cout << list.getSize() << std::endl;
-    print(list);
-
-    lab618::CDualLinkedList<my_struct> list_d;
-    full_dual(list_d, 3);
-    lab618::CDualLinkedList<my_struct>::CIterator iter = list_d.end();
-    ++iter;
-    for(; iter.isValid(); --iter)
-    {
-        list_d.eraseAndNext(iter);
-        std::cout << list.getSize() << std::endl;
-    }
-    std::cout << list.getSize() << std::endl;
-    print(list);
-    return 0;
-}
+    std::cout << list.getSize() << ' ';
+    std::cout << std::endl;
+}*/
