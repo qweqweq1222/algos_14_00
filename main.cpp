@@ -3,7 +3,7 @@
 #include<iostream>
 #include "list.h"
 #include <random>
-
+#include <cstdlib>
 // генерация рандомных строк
 std::string random_string(std::string::size_type length)
 {
@@ -70,7 +70,8 @@ TEST_SUITE("dual_erase")
     TEST_CASE("erase_begin_end")
     {
         full_dual(list,5);
-        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it) {
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        for(it; it.isValid(); ++it) {
             std::cout << list.getSize() << ' ';
             list.erase(it);
         }
@@ -90,7 +91,8 @@ TEST_SUITE("dual_erase")
     TEST_CASE("eraseAndNext_begin_end")
     {
         full_dual(list,5);
-        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.begin(); it.isValid(); ++it) {
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        for(it; it.isValid(); ++it) {
             std::cout << list.getSize() << ' ';
             list.eraseAndNext(it);
         }
@@ -101,7 +103,6 @@ TEST_SUITE("dual_erase")
     {
         full_dual(list,5);
         for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it) {
-            std::cout << list.getSize() << ' ';
             list.eraseAndNext(it);
         }
         std::cout << std::endl;
@@ -133,6 +134,127 @@ TEST_SUITE("dual_erase")
         }
         std::cout << std::endl;
         REQUIRE(list.getSize() == 4);
+    }
+    TEST_CASE("erase_randomly_from_begin")
+    {
+        int random = 0;
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        int size = list.getSize();
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        for(it; it.isValid(); ++it)
+        {
+            random = rand() % 2;
+            if(random == 1) {
+                list.erase(it);
+                size -=1;
+            }
+        }
+        print_dual(list);
+        REQUIRE(size == list.getSize());
+    }
+    TEST_CASE("erase_randomly_from_end")
+    {
+        int random = 0;
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        int size = list.getSize();
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.end();
+        for(it; it.isValid(); --it)
+        {
+            random = rand() % 2;
+            if(random == 1)
+            {
+                list.erase(it);
+                size-=1;
+            }
+        }
+        print_dual(list);
+        REQUIRE(size == list.getSize());
+    }
+    TEST_CASE("eraseAndNeXT_randomly_from_end")
+    {
+        int random = 0;
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        int size = list.getSize();
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.end();
+        for(it; it.isValid(); ++it)
+        {
+            random = rand() % 2;
+            if(random == 1)
+            {
+                size -= 1;
+                list.eraseAndNext(it);
+            }
+        }
+        print_dual(list);
+        REQUIRE(size == list.getSize());
+    }
+    TEST_CASE("eraseAndNeXT_randomly_from_begin")
+    {
+        int random = 0;
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        int size = list.getSize();
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        for(it; it.isValid(); ++it)
+        {
+            random = rand() % 2;
+            if(random == 1)
+            {
+                size -= 1;
+                list.eraseAndNext(it);
+            }
+        }
+        print_dual(list);
+        REQUIRE(size == list.getSize());
+    }
+    TEST_CASE("eraseAndNeXT_from_random_place_++")
+    {
+        int random = 0;
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        int size = list.getSize();
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+
+        random = rand() % size;
+        for(int i =0; i<rand(); ++i)
+            ++it;
+        for(it; it.isValid(); ++it)
+        {
+            random = rand() % 2;
+            if(random == 1)
+            {
+                size -= 1;
+                list.eraseAndNext(it);
+            }
+        }
+        print_dual(list);
+        REQUIRE(size == list.getSize());
+    }
+    TEST_CASE("eraseAndNeXT_from_random_place_--")
+    {
+        int random = 0;
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        int size = list.getSize();
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.end();
+
+        random = rand() % size;
+        for(int i =0; i<rand(); ++i)
+            --it;
+        for(it; it.isValid(); --it)
+        {
+            random = rand() % 2;
+            if(random == 1)
+            {
+                size -= 1;
+                list.eraseAndNext(it);
+            }
+        }
+        print_dual(list);
+        REQUIRE(size == list.getSize());
     }
 }
 
