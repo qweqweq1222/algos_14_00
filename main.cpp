@@ -66,9 +66,9 @@ void full_dual(lab618::CDualLinkedList<my_struct>  &List, int N)
 
 TEST_SUITE("dual_erase")
 {
-    lab618::CDualLinkedList<my_struct> list;
     TEST_CASE("erase_begin_end")
     {
+        lab618::CDualLinkedList<my_struct> list;
         full_dual(list,5);
         lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
         for(it; it.isValid(); ++it) {
@@ -80,16 +80,31 @@ TEST_SUITE("dual_erase")
     }
     TEST_CASE("erase_end_begin")
     {
+        lab618::CDualLinkedList<my_struct> list;
         full_dual(list,5);
-        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it) {
-            std::cout << list.getSize() << ' ';
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.end();
+        for(it; it.isValid(); --it) {
             list.erase(it);
+            print_dual(list);
         }
         std::cout << std::endl;
-        REQUIRE(list.getSize() == 0);
+        REQUIRE(list.getSize() == 2);
+    }
+    TEST_CASE("erase_end_begin____")
+    {
+        lab618::CDualLinkedList<my_struct> list;
+        full_dual(list,5);
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.end();
+        for(it; it.isValid(); ++it) {
+            list.erase(it);
+            print_dual(list);
+        }
+        std::cout << std::endl;
+        REQUIRE(list.getSize() == 4);
     }
     TEST_CASE("eraseAndNext_begin_end")
     {
+        lab618::CDualLinkedList<my_struct> list;
         full_dual(list,5);
         lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
         for(it; it.isValid(); ++it) {
@@ -97,12 +112,14 @@ TEST_SUITE("dual_erase")
             list.eraseAndNext(it);
         }
         std::cout << std::endl;
-        REQUIRE(list.getSize() == 0);
+        REQUIRE(list.getSize() == 2);
     }
     TEST_CASE("eraseAndNext_end_begin")
     {
+        lab618::CDualLinkedList<my_struct> list;
         full_dual(list,5);
-        for(lab618::CDualLinkedList<my_struct>::CIterator it = list.end(); it.isValid(); --it) {
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.end();
+        for(it; it.isValid(); --it) {
             list.eraseAndNext(it);
         }
         std::cout << std::endl;
@@ -110,6 +127,7 @@ TEST_SUITE("dual_erase")
     }
     TEST_CASE("erase_middle")
     {
+        lab618::CDualLinkedList<my_struct> list;
         full_dual(list,5);
         lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
         ++it;
@@ -123,6 +141,7 @@ TEST_SUITE("dual_erase")
     }
     TEST_CASE("eraseAndNext_middle")
     {
+        lab618::CDualLinkedList<my_struct> list;
         full_dual(list,5);
         lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
         ++it;
@@ -133,7 +152,7 @@ TEST_SUITE("dual_erase")
             size = list.getSize();
         }
         std::cout << std::endl;
-        REQUIRE(list.getSize() == 4);
+        REQUIRE(list.getSize() == 3);
     }
     TEST_CASE("erase_randomly_from_begin")
     {
