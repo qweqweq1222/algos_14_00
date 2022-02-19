@@ -1,11 +1,6 @@
-//
-// Created by anreydron on 06.02.2022.
-//
+#ifndef TEMPLATES_LIST_2022_02_03
+#define TEMPLATES_LIST_2022_02_03
 
-
-//
-// Created by anreydron on 06.02.2022.
-//
 #include<exception>
 namespace lab618
 {
@@ -37,7 +32,11 @@ namespace lab618
                 m_pCurrent = src.m_pCurrent;
             }
 
-            ~CIterator()=default;
+            ~CIterator()
+            {
+                m_pCurrent = nullptr;
+                m_pBegin = nullptr;
+            }
 
             CIterator& operator = (const CIterator&  src)
             {
@@ -165,8 +164,9 @@ namespace lab618
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
-            leaf *buffer = m_pBegin;
-            if(it.getLeaf() == m_pBegin)
+            leaf* buffer = m_pBegin;
+            leaf* current = it.getLeaf();
+            if(current == m_pBegin)
             {
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
@@ -185,7 +185,7 @@ namespace lab618
                 while(buffer->pnext != it.getLeaf())
                     buffer = buffer->pnext;
                 leaf* buffer_ = it.getLeaf();
-                if(it.getLeaf() == m_pEnd)
+                if(current == m_pEnd)
                 {
                     it.setLeaf(buffer);
                     buffer->pnext = nullptr;
@@ -269,7 +269,12 @@ namespace lab618
                 m_pBegin = src.m_pBegin;
             }
 
-            ~CIterator() = default;
+            ~CIterator()
+            {
+                m_pCurrent = nullptr;
+                m_pBegin = nullptr;
+                m_pEnd = nullptr;
+            }
 
             CIterator& operator = (const CIterator&  src)
             {
@@ -435,8 +440,9 @@ namespace lab618
         // изменяет состояние итератора. выставляет предыдущую позицию.
         void erase(CIterator& it)
         {
-            leaf *buffer = m_pBegin;
-            if(it.getLeaf() == m_pBegin)
+            leaf* buffer = m_pBegin;
+            leaf* current = it.getLeaf();
+            if(current == m_pBegin)
             {
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
@@ -454,7 +460,7 @@ namespace lab618
             else
             {
                 buffer = it.getLeaf();
-                if(it.getLeaf() == m_pEnd)
+                if(current == m_pEnd)
                 {
                     m_pEnd = it.getLeaf()->pprev;
                     m_pEnd->pnext= nullptr;
@@ -462,8 +468,8 @@ namespace lab618
                 }
                 else
                 {
-                    it.getLeaf()->pnext->pprev = it.getLeaf()->pprev;
-                    it.getLeaf()->pprev->pnext = it.getLeaf()->pnext;
+                    buffer->pnext->pprev = buffer->pprev;
+                    buffer->pprev->pnext = buffer->pnext;
                     it.setLeaf(buffer->pprev);
                 }
             }
@@ -474,7 +480,7 @@ namespace lab618
         void eraseAndNext(CIterator& it)
         {
             leaf *buffer = it.getLeaf();
-            if(it.getLeaf() == m_pBegin)
+            if(buffer == m_pBegin)
             {
                 if(m_pBegin == m_pEnd && m_pBegin != nullptr)
                 {
@@ -491,7 +497,7 @@ namespace lab618
             }
             else
             {
-                if(it.getLeaf() == m_pEnd)
+                if(buffer == m_pEnd)
                 {
                     m_pEnd = m_pEnd->pprev;
                     m_pEnd->pnext = nullptr;
@@ -499,8 +505,8 @@ namespace lab618
                 }
                 else
                 {
-                    it.getLeaf()->pnext->pprev = it.getLeaf()->pprev;
-                    it.getLeaf()->pprev->pnext = it.getLeaf()->pnext;
+                    buffer->pnext->pprev = buffer->pprev;
+                    buffer->pprev->pnext = buffer->pnext;
                     it.setLeaf(buffer->pnext);
                 }
             }
@@ -551,4 +557,5 @@ namespace lab618
     private:
         leaf* m_pBegin, *m_pEnd;
     };
-};//#ifndef TEMPLATES_LIST_2022_02_03
+};
+#endif//#ifndef TEMPLATES_LIST_2022_02_03
