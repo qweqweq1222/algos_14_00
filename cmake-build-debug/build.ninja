@@ -78,6 +78,12 @@ build CMakeFiles/untitled.dir/main.cpp.o: CXX_COMPILER__untitled_Debug /home/anr
   OBJECT_DIR = CMakeFiles/untitled.dir
   OBJECT_FILE_DIR = CMakeFiles/untitled.dir
 
+build CMakeFiles/untitled.dir/manager/main.cpp.o: CXX_COMPILER__untitled_Debug /home/anreydron/CLionProjects/untitled/manager/main.cpp || cmake_object_order_depends_target_untitled
+  DEP_FILE = CMakeFiles/untitled.dir/manager/main.cpp.o.d
+  FLAGS = -g -std=gnu++14
+  OBJECT_DIR = CMakeFiles/untitled.dir
+  OBJECT_FILE_DIR = CMakeFiles/untitled.dir/manager
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target untitled
@@ -86,7 +92,7 @@ build CMakeFiles/untitled.dir/main.cpp.o: CXX_COMPILER__untitled_Debug /home/anr
 #############################################
 # Link the executable untitled
 
-build untitled: CXX_EXECUTABLE_LINKER__untitled_Debug CMakeFiles/untitled.dir/main.cpp.o
+build untitled: CXX_EXECUTABLE_LINKER__untitled_Debug CMakeFiles/untitled.dir/main.cpp.o CMakeFiles/untitled.dir/manager/main.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/untitled.dir
   POST_BUILD = :
