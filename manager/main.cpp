@@ -8,9 +8,12 @@ private:
 };
 int main(void)
 {
-    lab618::CMemoryManager<s> manager(2);
+    lab618::CMemoryManager<s> manager(2, true);
     int sa = sizeof(s);
-    s *a = manager.newObject();
-    s *b = manager.newObject();
-    s *d = manager.newObject();
+    manager.newObject();
+    manager.newObject();
+    manager.newObject();
+    manager.newObject();
+    manager.newObject();
+    manager.clear();
 }

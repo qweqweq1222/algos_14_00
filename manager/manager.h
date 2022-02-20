@@ -2,6 +2,7 @@
 #define MEMORY_MANAGER_HEAD_H_2022_02_17
 #include <iostream>
 #include <cstring>
+#include <exception>
 
 template <class TYPE>
 inline void ConstructElements(TYPE* pElements)
@@ -31,8 +32,7 @@ namespace lab618
             block *pnext;
             // Первая свободная ячейка
             int firstFreeIndex;
-            // Число заполненных ячеек
-            int usedCount;
+            // Число заполненных ячее
         };
     public:
         class CException
@@ -40,6 +40,7 @@ namespace lab618
         public:
             CException()
             {
+                throw std::out_of_range("threw something");
             }
         };
 
@@ -53,79 +54,125 @@ namespace lab618
 
         virtual ~CMemoryManager()
         {
-            this->clear();
+            clear();
         }
 
         // Получить адрес нового элемента из менеджера
         T* newObject()
         {
-            int index = 0;
+            block *runner = m_pCurrentBlk;
             if(m_pBlocks == nullptr)
             {
                 m_pBlocks = newBlock();
                 m_pCurrentBlk = m_pBlocks;
-                index = m_pCurrentBlk->firstFreeIndex;
-                m_pCurrentBlk->firstFreeIndex = *((int *) (m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
+                m_pCurrentBlk->firstFreeIndex = *((int *) m_pCurrentBlk->pdata);
+                ConstructElements(m_pCurrentBlk->pdata);
+                return (m_pCurrentBlk->pdata);
             }
             else
             {
-                index = m_pCurrentBlk->firstFreeIndex;
-                if (index != -1)
-                    m_pCurrentBlk->firstFreeIndex = *((int *) (m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
-                else // если в текущем блоке нету места
+                if (m_pCurrentBlk->firstFreeIndex != -1) //повезло - в текущем сразу нашлось место
                 {
-                    block* buffer = m_pBlocks;
-                    while(buffer->pnext != nullptr)
+                    m_pCurrentBlk->firstFreeIndex = *((int *)(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
+                    ConstructElements(runner->pdata + runner->firstFreeIndex);
+                    return (runner->pdata + runner->firstFreeIndex);
+                } else // надо искать новый блок (если он есть) или создавать новый
+                {
+                    while (runner->pnext != nullptr) //проверяем все блоки до последнего
                     {
-                        if(index == -1)
-                            buffer = buffer->pnext;
-                        else
+                        if (runner->firstFreeIndex != -1) // нашли свободное место
                         {
-                            buffer->firstFreeIndex = *((int *) (buffer->pdata + buffer->firstFreeIndex));
-                            m_pCurrentBlk = buffer;
-                            ConstructElements(m_pCurrentBlk->pdata + index);
-                            return (m_pCurrentBlk->pdata + index);
-                        }
-                        index = buffer->firstFreeIndex;
+                            m_pCurrentBlk = runner;
+                            m_pCurrentBlk->firstFreeIndex = *((int *) runner->pdata + runner->firstFreeIndex);
+                            ConstructElements(runner->pdata + runner->firstFreeIndex);
+                            return (runner->pdata + runner->firstFreeIndex);
+                        } else
+                            runner = runner->pnext;
                     }
-                    if(index = -1)
+                    //дошли до последнего блока
+                    if (runner->firstFreeIndex != -1) // нашли место в последнем блоке
                     {
-                        // во всех блоках нету места
-                        buffer->pnext = newBlock();
-                        m_pCurrentBlk = buffer->pnext;
-                        index = 0;
+                        m_pCurrentBlk = runner;
+                        m_pCurrentBlk->firstFreeIndex = *((int *) runner->pdata + runner->firstFreeIndex);
+                        ConstructElements(runner->pdata + runner->firstFreeIndex);
+                        return (runner->pdata + runner->firstFreeIndex);
+                    } else // не нашли место и в последнем блоке - создаем блок
+                    {
+                        runner->pnext = newBlock();
+                        m_pCurrentBlk = runner->pnext;
+                        m_pCurrentBlk->firstFreeIndex = 1;
+                        ConstructElements(m_pCurrentBlk->pdata);
+                        return (m_pCurrentBlk->pdata);
                     }
                 }
             }
-            ConstructElements(m_pCurrentBlk->pdata + index);
-            return (m_pCurrentBlk->pdata + index);
         }
 
         // Освободить элемент в менеджере
         bool deleteObject(T* p)
         {
+            block* buffer = m_pBlocks;
+            T* runner = buffer->pdata;
+            bool done = false;
+            int index = 0;
+            while(!done || buffer == nullptr) // ищим где элемент
+            {
+                runner = buffer->pdata;
+                while(!done || runner == nullptr)
+                {
+                    if(runner == p)
+                        done = true;
+                    else
+                    {
+                        ++runner;
+                        ++index;
+                    }
+                }
+                index = 0;
+                if(!done)
+                    ++buffer;
+            }
+            if(!done)
+                CException();
+            else
+            {
+                DestructElements(runner);
+                /* определяем что положить в качестве позиции следующего на выделенное место*/
+                if (index <= buffer->firstFreeIndex) // удаляемый до первого свободного
+                {
+                    *((int *)runner) = buffer->firstFreeIndex;
+                    buffer->firstFreeIndex = index;
+                }
+                else // удаляемый после первого свободного
+                {
+                    int index_ = buffer->firstFreeIndex;
+                    T *dif = buffer->pdata + index_;
+                    while ((dif - runner) <= 0)
+                    {
+                        index_ = *(int *) dif;
+                        dif = buffer->pdata + index_;
+                    }
+                    *(int *) runner = index_;
+                }
+            }
+            return done;
         }
 
         // Очистка данных, зависит от m_isDeleteElementsOnDestruct
         void clear()
         {
-            T* buffer = m_pBlocks->pdata;
-            bool is = (sizeof(T) == sizeof(*(m_pBlocks->pdata)));
-            int s = sizeof(T);
-            int b = sizeof(m_pBlocks->pdata);
-            block* buffer_ = nullptr;
-            m_pCurrentBlk = nullptr;
-            while(m_pBlocks != nullptr)
+            block* buffer = m_pBlocks;
+            while(buffer != nullptr)
             {
-                while(m_pBlocks->pdata != nullptr)
+                if(m_isDeleteElementsOnDestruct == false)
+                    CException();
+                else
                 {
-                    buffer = m_pBlocks->pdata;
-                    ++(m_pBlocks->pdata);
-                    delete buffer;
+                    m_pBlocks = m_pBlocks->pnext;
+                    m_pCurrentBlk = m_pBlocks;
+                    deleteBlock(buffer);
+                    buffer = m_pBlocks;
                 }
-                buffer_ = m_pBlocks;
-                m_pBlocks = m_pBlocks->pnext;
-                delete buffer_;
             }
         }
     private:
@@ -152,6 +199,15 @@ namespace lab618
         // Освободить память блока данных. Применяется в clear
         void deleteBlock(block *p)
         {
+            //делаем так,чтобы никаких указателей на удаленный блок не оставалось
+            p->firstFreeIndex = 0;
+            T *runner = p->pdata;
+            for(int i=0; i < m_blkSize; ++i)
+            {
+                DestructElements(runner);
+                ++runner;
+            }
+            delete[] ((char*)p);
         }
 
         // Размер блока
