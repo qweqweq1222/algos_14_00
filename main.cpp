@@ -277,6 +277,17 @@ TEST_SUITE("dual_erase")
     }
 }
 
+    TEST_CASE("2 lists ")
+    {
+        lab618::CDualLinkedList<my_struct> list;
+        lab618::CDualLinkedList<my_struct> list_;
+        full_dual(list,5);
+        full_dual(list_,5);
+        lab618::CDualLinkedList<my_struct>::CIterator it = list.begin();
+        for(it; it.isValid(); ++it)
+            list_.erase(it);
+    }
+
 /*int main(void)
 {
     lab618::CDualLinkedList<my_struct> list;

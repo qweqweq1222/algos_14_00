@@ -10,10 +10,6 @@ int main(void)
 {
     lab618::CMemoryManager<s> manager(2, true);
     int sa = sizeof(s);
-    manager.newObject();
-    manager.newObject();
-    manager.newObject();
-    manager.newObject();
-    manager.newObject();
-    manager.clear();
+    s* var = manager.newObject();
+    manager.deleteObject(var);
 }

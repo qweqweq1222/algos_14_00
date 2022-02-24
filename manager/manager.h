@@ -61,7 +61,7 @@ namespace lab618
         T* newObject()
         {
             block *runner = m_pCurrentBlk;
-            if(m_pBlocks == nullptr)
+            if(m_pBlocks == nullptr) // создаем первый блок
             {
                 m_pBlocks = newBlock();
                 m_pCurrentBlk = m_pBlocks;
@@ -112,12 +112,13 @@ namespace lab618
         bool deleteObject(T* p)
         {
             block* buffer = m_pBlocks;
-            T* runner = buffer->pdata;
+            T* runner = nullptr;
             bool done = false;
             int index = 0;
             while(!done || buffer == nullptr) // ищим где элемент
             {
                 runner = buffer->pdata;
+                index = 0;
                 while(!done || runner == nullptr)
                 {
                     if(runner == p)
@@ -128,11 +129,10 @@ namespace lab618
                         ++index;
                     }
                 }
-                index = 0;
                 if(!done)
                     ++buffer;
             }
-            if(!done)
+            if(!done) //пытаемся удалить несуществующий в менеджере элемент
                 CException();
             else
             {
@@ -152,7 +152,7 @@ namespace lab618
                         index_ = *(int *) dif;
                         dif = buffer->pdata + index_;
                     }
-                    *(int *) runner = index_;
+                    *((int *)runner) = index_;
                 }
             }
             return done;
@@ -185,7 +185,7 @@ namespace lab618
             new_block->pnext = nullptr;
             new_block->pdata = (T *)new char[sizeof(T)*m_blkSize];
             T* buffer = new_block->pdata;
-            for(int i = 0; i < m_blkSize; ++i)
+            for(int i = 0; i < m_blkSize; ++i) // заполняем int
             {
                 if(i == m_blkSize - 1)
                     *((int*)buffer) = -1;
@@ -197,10 +197,8 @@ namespace lab618
         }
 
         // Освободить память блока данных. Применяется в clear
-        void deleteBlock(block *p)
+        void deleteBlock(block *p) // т.к. применятся в clear, который вызываем когда удаляем все, то занулять pnext не надо т.к. удаляем голову
         {
-            //делаем так,чтобы никаких указателей на удаленный блок не оставалось
-            p->firstFreeIndex = 0;
             T *runner = p->pdata;
             for(int i=0; i < m_blkSize; ++i)
             {
