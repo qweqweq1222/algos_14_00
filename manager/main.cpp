@@ -8,8 +8,11 @@ private:
 };
 int main(void)
 {
-    lab618::CMemoryManager<s> manager(2, true);
-    int sa = sizeof(s);
-    s* var = manager.newObject();
-    manager.deleteObject(var);
+    lab618::CMemoryManager<s> manager(3, true);
+    for(int i = 0; i < 4; ++i)
+        manager.newObject();
+    s* elem = manager.newObject();
+    manager.check_exp();
+    manager.deleteObject(elem);
+    manager.check_exp();
 }
