@@ -79,7 +79,7 @@ namespace lab618
                 if (m_pCurrentBlk->firstFreeIndex != -1) //повезло - в текущем сразу нашлось место
                 {
                     index = pThisBlk->firstFreeIndex;
-                    m_pCurrentBlk->firstFreeIndex = *((int *)(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
+                    m_pCurrentBlk->firstFreeIndex = *(reinterpret_cast<int*>(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
                     ConstructElements(pThisBlk->pdata + index);
                     ++(pThisBlk->usedCount);
                     pThisBlk->vec[index] = true;
@@ -94,7 +94,7 @@ namespace lab618
                         {
                             index = pThisBlk->firstFreeIndex;
                             m_pCurrentBlk = pThisBlk;
-                            m_pCurrentBlk->firstFreeIndex = *((int *) pThisBlk->pdata + pThisBlk->firstFreeIndex);
+                            m_pCurrentBlk->firstFreeIndex = *(reinterpret_cast<int*>(pThisBlk->pdata + pThisBlk->firstFreeIndex));
                             ConstructElements(pThisBlk->pdata + index);
                             ++(pThisBlk->usedCount);
                             pThisBlk->vec[index] = true;
@@ -152,12 +152,12 @@ namespace lab618
                 /* определяем что положить в качестве позиции следующего на выделенное место*/
                 if (index <= pThisBlk->firstFreeIndex && pThisBlk->firstFreeIndex != -1) // удаляемый до первого свободного и место было
                 {
-                    *((int *)pTmpElement) = pThisBlk->firstFreeIndex;
+                    *(reinterpret_cast<int*>(pTmpElement)) = pThisBlk->firstFreeIndex;
                     pThisBlk->firstFreeIndex = index;
                 }
                 else if(pThisBlk->firstFreeIndex == -1) // не было места до этого момента
                 {
-                    *((int *)pTmpElement) = -1;
+                    *(reinterpret_cast<int*>(pTmpElement)) = -1;
                     pThisBlk->firstFreeIndex = index;
                 }
                 else // удаляемый после первого свободного и место есть
@@ -170,9 +170,9 @@ namespace lab618
                     while(pThisBlk->vec[index_post] == true && index_post < m_blkSize)
                         ++index_post;
                     if(index_post < m_blkSize)
-                        *((int *)pTmpElement) = index_post;
+                        *(reinterpret_cast<int*>(pTmpElement)) = index_post;
                     else
-                        *((int *)pTmpElement) = -1;
+                        *(reinterpret_cast<int*>(pTmpElement)) = -1;
                 }
             }
             return true;
@@ -181,62 +181,61 @@ namespace lab618
         // Очистка данных, зависит от m_isDeleteElementsOnDestruct
         void clear()
         {
-            block* buffer = m_pBlocks;
-            if(m_isDeleteElementsOnDestruct == false)
-            {
-                while(buffer != nullptr)
+            block* pThisBlk = m_pBlocks;
+            if(!m_isDeleteElementsOnDestruct)
+                while (pThisBlk != nullptr)
                 {
-                    if (buffer->usedCount != 0)
+                    if (pThisBlk->usedCount != 0)
                         throw new CException();
-                    buffer = buffer->pnext;
+                    pThisBlk = pThisBlk->pnext;
                 }
-            }
-            else
+
+            pThisBlk = m_pBlocks;
+            while(pThisBlk != nullptr)
             {
-                while(buffer != nullptr)
-                {
-                    m_pBlocks = m_pBlocks->pnext;
-                    m_pCurrentBlk = m_pBlocks;
-                    deleteBlock(buffer);
-                    buffer = m_pBlocks;
-                }
+                m_pBlocks = m_pBlocks->pnext;
+                m_pCurrentBlk = m_pBlocks;
+                deleteBlock(pThisBlk);
+                pThisBlk = m_pBlocks;
             }
         }
+
         void check()
         {
-            block* buffer = m_pBlocks;
-            while(buffer != nullptr)
+            block* pThisBlk = m_pBlocks;
+            while(pThisBlk != nullptr)
             {
                 for(int i =0; i < m_blkSize; ++i)
                 {
-                    if (buffer->vec[i] == true)
+                    if (pThisBlk->vec[i] == true)
                         std::cout << " 1 ";
                     else
                         std::cout << " 0 ";
                 }
-                buffer = buffer->pnext;
+                pThisBlk = pThisBlk->pnext;
                 std::cout << std::endl;
             }
             std::cout << std::endl;
             std::cout << std::endl;
         }
+
         void check_exp()
         {
-            block* buffer = m_pBlocks;
-            T* pThisBlk = buffer->pdata;
-            while(buffer != nullptr)
+            block* pThisBlk = m_pBlocks;
+            T* pTmpElement = pThisBlk->pdata;
+            while(pThisBlk != nullptr)
             {
                 for(int i =0; i < m_blkSize; ++i)
                 {
-                    if(buffer->vec[i] == false)
-                        std::cout<< *((int*)pThisBlk) << " ";
+                    if(pThisBlk->vec[i] == false)
+                        std::cout<< *(reinterpret_cast<int*>(pTmpElement)) << " ";
                     else
                         std::cout<< " __ ";
-                    ++pThisBlk;
+                    ++pTmpElement;
                 }
-                buffer = buffer->pnext;
-                if(buffer != nullptr)
-                    pThisBlk = buffer->pdata;
+                pThisBlk = pThisBlk->pnext;
+                if(pThisBlk != nullptr)
+                    pTmpElement = pThisBlk->pdata;
                 std::cout << std::endl;
             }
         }
@@ -250,15 +249,15 @@ namespace lab618
             new_block->pnext = nullptr;
             new_block->usedCount = 0;
             new_block->vec.resize(m_blkSize, false);
-            new_block->pdata = (T *)new char[sizeof(T)*m_blkSize];
+            new_block->pdata = reinterpret_cast<T*>(new char[sizeof(T)*m_blkSize]);
             T* buffer = new_block->pdata;
             for(int i = 0; i < m_blkSize; ++i) // заполняем int
             {
                 if(i == m_blkSize - 1)
-                    *((int*)buffer) = -1;
+                    *(reinterpret_cast<int*>(buffer)) = -1;
                 else
-                    *((int*)buffer) = i + 1;
-                std::cout << *((int*)buffer) << ' ';
+                    *(reinterpret_cast<int*>(buffer)) = i + 1;
+                std::cout << *(reinterpret_cast<int*>(buffer)) << ' ';
                 ++buffer;
             }
             std::cout << std::endl;
@@ -275,7 +274,7 @@ namespace lab618
                     DestructElements(pThisBlk);
                 ++pThisBlk;
             }
-            delete[] ((char*)p);
+            delete[] reinterpret_cast<char*> (p);
         }
 
         // Размер блока
