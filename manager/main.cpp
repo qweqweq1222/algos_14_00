@@ -6,37 +6,46 @@ private:
     int b=1;
     char c= 'a';
 };
-void check_true()
+void check_true_empty()
 {
-    lab618::CMemoryManager<s> manager(3, true);
-    manager.newObject();
-    s* elem_1 = manager.newObject();
-    manager.newObject();
-    manager.newObject();
-    s* elem_2 = manager.newObject();
-    manager.newObject();
+    lab618::CMemoryManager<s> manager(7, true);
+    s** mass = new s* [5];
+    for(int i = 0; i < 5; ++i)
+    {
+        mass[i] = manager.newObject();
+        for (int i = 0; i < 6; ++i)
+            manager.newObject();
+    }
     manager.check();
     manager.check_exp();
-    manager.deleteObject(elem_1);
-    manager.deleteObject(elem_2);
+    for(int i = 0; i < 5; ++i)
+        manager.deleteObject(mass[i] + i);
+    for(int i = 0; i < 5; ++i)
+        manager.deleteObject(mass[i] + i + 1);
     manager.check();
     manager.check_exp();
+
 }
-void check_delete()
+void check_false_empty()
 {
-    lab618::CMemoryManager<s> manager(3, false);
-    s* elem_1 = manager.newObject();
-    s* elem_2 = manager.newObject();
-    s* elem_3 = manager.newObject();
-    s* elem_4 = manager.newObject();
-    manager.deleteObject(elem_4);
-    manager.deleteObject(elem_3);
-    manager.deleteObject(elem_2);
-    manager.deleteObject(elem_1);
+    lab618::CMemoryManager<s> manager(7, false);
+    s** mass = new s* [5];
+    for(int i = 0; i < 5; ++i)
+    {
+        mass[i] = manager.newObject();
+        for (int i = 0; i < 6; ++i)
+            manager.newObject();
+    }
+    for(int i = 0; i < 5; ++i)
+    {
+        for (int j = 0; j < 7; ++j)
+            manager.deleteObject(mass[i] + j);
+    }
     manager.check();
+    manager.check_exp();
 }
 int main(void)
 {
-    check_delete();
-    check_true();
+    check_true_empty();
+    check_false_empty();
 }

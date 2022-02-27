@@ -128,58 +128,60 @@ namespace lab618
         // Освободить элемент в менеджере
         bool deleteObject(T* p)
         {
-            block* buffer = m_pBlocks;
-            T* runner = nullptr;
+            block* pThisBlk = m_pBlocks;
+            T* pTmpElement = nullptr;
             bool done = false;
             int index = 0;
-            while(!done || buffer == nullptr) // ищим где элемент
+            while(!done && pThisBlk != nullptr) // ищим где элемент
             {
-                runner = buffer->pdata;
-                index = 0;
-                while(!done && index < m_blkSize)
+                done = (pThisBlk->pdata <= p) && (p <= (pThisBlk->pdata + (m_blkSize - 1)));
+                if(done)
                 {
-                    if(runner == p)
-                        done = true;
-                    else
+                    pTmpElement = pThisBlk->pdata;
+                    while(pTmpElement != p)
                     {
-                        ++runner;
+                        ++pTmpElement;
                         ++index;
                     }
                 }
                 if(!done)
-                    buffer = buffer->pnext;
+                    pThisBlk = pThisBlk->pnext;
             }
-            if(!done) //пытаемся удалить несуществующий в менеджере элемент
-                throw new CException();
+            if(done == false) //пытаемся удалить несуществующий в менеджере элемент
+                return false;
             else
             {
-                DestructElements(runner);
-                buffer->vec[index] = false;
-                --(buffer->usedCount);
+                DestructElements(pTmpElement);
+                pThisBlk->vec[index] = false;
+                --(pThisBlk->usedCount);
+
                 /* определяем что положить в качестве позиции следующего на выделенное место*/
-                if (index <= buffer->firstFreeIndex && buffer->firstFreeIndex != -1) // удаляемый до первого свободного и место было
+                if (index <= pThisBlk->firstFreeIndex && pThisBlk->firstFreeIndex != -1) // удаляемый до первого свободного и место было
                 {
-                    *((int *)runner) = buffer->firstFreeIndex;
-                    buffer->firstFreeIndex = index;
+                    *((int *)pTmpElement) = pThisBlk->firstFreeIndex;
+                    pThisBlk->firstFreeIndex = index;
                 }
-                else if( buffer->firstFreeIndex == -1) // не было места до этого момента
+                else if(pThisBlk->firstFreeIndex == -1) // не было места до этого момента
                 {
-                    *((int *)runner) = -1;
-                    buffer->firstFreeIndex = index;
+                    *((int *)pTmpElement) = -1;
+                    pThisBlk->firstFreeIndex = index;
                 }
                 else // удаляемый после первого свободного и место есть
                 {
-                    int index_ = buffer->firstFreeIndex;
-                    T *dif = buffer->pdata + index_;
-                    while ((dif - runner) <= 0)
-                    {
-                        index_ = *(int *) dif;
-                        dif = buffer->pdata + index_;
-                    }
-                    *((int *)runner) = index_;
+                    int index_prev = index - 1;
+                    int index_post = index + 1;
+                    while(pThisBlk->vec[index_prev] == true && index_prev > 0)
+                        --index_prev;
+                    *((int*)(pThisBlk->pdata + index_prev)) = index;
+                    while(pThisBlk->vec[index_post] == true && index_post < m_blkSize)
+                        ++index_post;
+                    if(index_post < m_blkSize)
+                        *((int *)pTmpElement) = index_post;
+                    else
+                        *((int *)pTmpElement) = -1;
                 }
             }
-            return done;
+            return true;
         }
 
         // Очистка данных, зависит от m_isDeleteElementsOnDestruct
