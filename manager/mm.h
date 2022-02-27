@@ -62,13 +62,13 @@ namespace lab618
         // Получить адрес нового элемента из менеджера
         T* newObject()
         {
-            block *runner = m_pCurrentBlk;
+            block *pThisBlk = m_pCurrentBlk;
             int index = 0;
             if(m_pBlocks == nullptr) // создаем первый блок
             {
                 m_pBlocks = newBlock();
                 m_pCurrentBlk = m_pBlocks;
-                m_pCurrentBlk->firstFreeIndex = *((int *) m_pCurrentBlk->pdata);
+                m_pCurrentBlk->firstFreeIndex = 1;
                 ConstructElements(m_pCurrentBlk->pdata);
                 ++(m_pCurrentBlk->usedCount);
                 m_pCurrentBlk->vec[0] = true;
@@ -78,49 +78,43 @@ namespace lab618
             {
                 if (m_pCurrentBlk->firstFreeIndex != -1) //повезло - в текущем сразу нашлось место
                 {
-                    index = runner->firstFreeIndex;
+                    index = pThisBlk->firstFreeIndex;
                     m_pCurrentBlk->firstFreeIndex = *((int *)(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
-                    ConstructElements(runner->pdata + index);
-                    ++(runner->usedCount);
-                    runner->vec[index] = true;
-                    return (runner->pdata + index);
+                    ConstructElements(pThisBlk->pdata + index);
+                    ++(pThisBlk->usedCount);
+                    pThisBlk->vec[index] = true;
+                    return (pThisBlk->pdata + index);
                 }
                 else // надо искать новый блок (если он есть) или создавать новый
                 {
-                    while (runner->pnext != nullptr) //проверяем все блоки до последнего
+                    block* tLastBlk = nullptr;
+                    while (pThisBlk != nullptr) //проверяем все блоки до последнего
                     {
-                        if (runner->firstFreeIndex != -1) // нашли свободное место
+                        if (pThisBlk->firstFreeIndex != -1) // нашли свободное место
                         {
-                            index = runner->firstFreeIndex;
-                            m_pCurrentBlk = runner;
-                            m_pCurrentBlk->firstFreeIndex = *((int *) runner->pdata + runner->firstFreeIndex);
-                            ConstructElements(runner->pdata + index);
-                            ++(runner->usedCount);
-                            runner->vec[index] = true;
-                            return (runner->pdata + index);
-                        } else
-                            runner = runner->pnext;
+                            index = pThisBlk->firstFreeIndex;
+                            m_pCurrentBlk = pThisBlk;
+                            m_pCurrentBlk->firstFreeIndex = *((int *) pThisBlk->pdata + pThisBlk->firstFreeIndex);
+                            ConstructElements(pThisBlk->pdata + index);
+                            ++(pThisBlk->usedCount);
+                            pThisBlk->vec[index] = true;
+                            return (pThisBlk->pdata + index);
+                        }
+                        else
+                        {
+                            tLastBlk = pThisBlk;
+                            pThisBlk = pThisBlk->pnext;
+                        }
+
                     }
-                    //дошли до последнего блока
-                    if (runner->firstFreeIndex != -1) // нашли место в последнем блоке
-                    {
-                        index = runner->firstFreeIndex;
-                        m_pCurrentBlk = runner;
-                        m_pCurrentBlk->firstFreeIndex = *((int *) runner->pdata + runner->firstFreeIndex);
-                        ConstructElements(runner->pdata + index);
-                        ++(runner->usedCount);
-                        runner->vec[index] = true;
-                        return (runner->pdata + index);
-                    } else // не нашли место и в последнем блоке - создаем блок
-                    {
-                        runner->pnext = newBlock();
-                        m_pCurrentBlk = runner->pnext;
-                        m_pCurrentBlk->firstFreeIndex = 1;
-                        m_pCurrentBlk->vec[0] = true;
-                        ConstructElements(m_pCurrentBlk->pdata);
-                        ++(m_pCurrentBlk->usedCount);
-                        return (m_pCurrentBlk->pdata);
-                    }
+                    //дошли до последнего блока // не нашли место и в последнем блоке - создаем блок
+                    tLastBlk->pnext = newBlock();
+                    m_pCurrentBlk = tLastBlk->pnext;
+                    m_pCurrentBlk->firstFreeIndex = 1;
+                    m_pCurrentBlk->vec[0] = true;
+                    ConstructElements(m_pCurrentBlk->pdata);
+                    ++(m_pCurrentBlk->usedCount);
+                    return (m_pCurrentBlk->pdata);
                 }
             }
         }
@@ -229,20 +223,20 @@ namespace lab618
         void check_exp()
         {
             block* buffer = m_pBlocks;
-            T* runner = buffer->pdata;
+            T* pThisBlk = buffer->pdata;
             while(buffer != nullptr)
             {
                 for(int i =0; i < m_blkSize; ++i)
                 {
                     if(buffer->vec[i] == false)
-                        std::cout<< *((int*)runner) << " ";
+                        std::cout<< *((int*)pThisBlk) << " ";
                     else
                         std::cout<< " __ ";
-                    ++runner;
+                    ++pThisBlk;
                 }
                 buffer = buffer->pnext;
                 if(buffer != nullptr)
-                    runner = buffer->pdata;
+                    pThisBlk = buffer->pdata;
                 std::cout << std::endl;
             }
         }
@@ -274,12 +268,12 @@ namespace lab618
         // Освободить память блока данных. Применяется в clear
         void deleteBlock(block *p) // т.к. применятся в clear, который вызываем когда удаляем все, то занулять pnext не надо т.к. удаляем голову
         {
-            T *runner = p->pdata;
+            T *pThisBlk = p->pdata;
             for(int i = 0; i < m_blkSize; ++i)
             {
                 if((p->vec)[i] == true)
-                    DestructElements(runner);
-                ++runner;
+                    DestructElements(pThisBlk);
+                ++pThisBlk;
             }
             delete[] ((char*)p);
         }
@@ -295,4 +289,4 @@ namespace lab618
     };
 }; // namespace lab618
 
-#endif // #define MEMORY_MANAGER_HEAD_H_2022_02_17
+#endif // #define MEMORY_MANAGER_HEAD_H_2022_02_17`
