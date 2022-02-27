@@ -119,6 +119,7 @@ namespace lab618
                         m_pCurrentBlk->firstFreeIndex = 1;
                         m_pCurrentBlk->vec[0] = true;
                         ConstructElements(m_pCurrentBlk->pdata);
+                        ++(runner->usedCount);
                         return (m_pCurrentBlk->pdata);
                     }
                 }

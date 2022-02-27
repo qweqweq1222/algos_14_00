@@ -1,5 +1,5 @@
 #include<iostream>
-#include "manager.h"
+#include "mm.h"
 class s{
 private:
     int a=1;
