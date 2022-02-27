@@ -43,7 +43,6 @@ namespace lab618
         public:
             CException()
             {
-                throw std::out_of_range("");
             }
         };
 
@@ -151,7 +150,7 @@ namespace lab618
                     buffer = buffer->pnext;
             }
             if(!done) //пытаемся удалить несуществующий в менеджере элемент
-                CException();
+                throw new CException();
             else
             {
                 DestructElements(runner);
@@ -192,7 +191,7 @@ namespace lab618
                 while(buffer != nullptr)
                 {
                     if (buffer->usedCount != 0)
-                        CException();
+                        throw new CException();
                     buffer = buffer->pnext;
                 }
             }
