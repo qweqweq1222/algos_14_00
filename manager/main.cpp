@@ -1,5 +1,5 @@
 #include<iostream>
-#include "mm.h"
+#include "list_1.h"
 #include <vector>
 #include <typeinfo>
 class s{
@@ -22,6 +22,9 @@ void test_(bool var)
     for(int i = 0; i < 14; ++i)
         if (i % 2 == 0)
             manager.deleteObject(vec[i]);
+    for(int i = 0; i < 14; ++i)
+        std::cout << *vec[i] << " ";
+    std::cout << std::endl;
 }
 void test_complete_deleted(bool var)
 {

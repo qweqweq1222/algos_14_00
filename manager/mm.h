@@ -35,7 +35,6 @@ namespace lab618
             int firstFreeIndex;
             // Число заполненных ячее
             int usedCount;
-            std::vector<bool> vec;
         };
     public:
         class CException
@@ -71,7 +70,6 @@ namespace lab618
                 m_pCurrentBlk->firstFreeIndex = 1;
                 ConstructElements(m_pCurrentBlk->pdata);
                 ++(m_pCurrentBlk->usedCount);
-                m_pCurrentBlk->vec[0] = true;
                 return (m_pCurrentBlk->pdata);
             }
             else
@@ -82,7 +80,6 @@ namespace lab618
                     m_pCurrentBlk->firstFreeIndex = *(reinterpret_cast<int*>(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex));
                     ConstructElements(pThisBlk->pdata + index);
                     ++(pThisBlk->usedCount);
-                    pThisBlk->vec[index] = true;
                     return (pThisBlk->pdata + index);
                 }
                 else // надо искать новый блок (если он есть) или создавать новый
@@ -97,7 +94,6 @@ namespace lab618
                             m_pCurrentBlk->firstFreeIndex = *(reinterpret_cast<int*>(pThisBlk->pdata + pThisBlk->firstFreeIndex));
                             ConstructElements(pThisBlk->pdata + index);
                             ++(pThisBlk->usedCount);
-                            pThisBlk->vec[index] = true;
                             return (pThisBlk->pdata + index);
                         }
                         else
@@ -111,7 +107,6 @@ namespace lab618
                     tLastBlk->pnext = newBlock();
                     m_pCurrentBlk = tLastBlk->pnext;
                     m_pCurrentBlk->firstFreeIndex = 1;
-                    m_pCurrentBlk->vec[0] = true;
                     ConstructElements(m_pCurrentBlk->pdata);
                     ++(m_pCurrentBlk->usedCount);
                     return (m_pCurrentBlk->pdata);
@@ -146,7 +141,6 @@ namespace lab618
             else
             {
                 DestructElements(pTmpElement);
-                pThisBlk->vec[index] = false;
                 --(pThisBlk->usedCount);
 
                 /* определяем что положить в качестве позиции следующего на выделенное место*/
@@ -162,18 +156,31 @@ namespace lab618
                 }
                 else // удаляемый после первого свободного и место есть
                 {
-                    int index_prev = index - 1;
-                    int index_post = (index < (m_blkSize - 1)) ? (index + 1) : (m_blkSize - 1);
-                    while(pThisBlk->vec[index_prev] == true && index_prev > 0)
-                        --index_prev;
-                    *((int*)(pThisBlk->pdata + index_prev)) = index;
-
-                    while(pThisBlk->vec[index_post] == true && index_post < m_blkSize)
-                        ++index_post;
-                    if(index_post !=  m_blkSize - 1)
-                        *(reinterpret_cast<int*>(pTmpElement)) = index_post;
+                    T* ptrPst = pThisBlk->pdata + pThisBlk->firstFreeIndex;
+                    int idx = *(reinterpret_cast<int *>(ptrPst));
+                    if(*(reinterpret_cast<int *>(ptrPst)) == -1)
+                    {
+                        *(reinterpret_cast<int *>(pTmpElement)) = -1;
+                        *(reinterpret_cast<int *>(ptrPst)) = index;
+                    }
                     else
-                        *(reinterpret_cast<int*>(pTmpElement)) = -1;
+                    {
+                        T* pre_ptr  = ptrPst;
+                        while(pTmpElement > ptrPst)
+                        {
+                            pre_ptr = ptrPst;
+                            ptrPst = pThisBlk->pdata + idx;
+                            idx = *(reinterpret_cast<int *>(ptrPst));
+                            if(idx == -1 && pTmpElement > ptrPst)
+                            {
+                                *(reinterpret_cast<int *>(pTmpElement)) = -1;
+                                *(reinterpret_cast<int *>(ptrPst)) = index;
+                                return true;
+                            }
+                        }
+                        *(reinterpret_cast<int *>(pTmpElement)) = *(reinterpret_cast<int *>(pre_ptr));
+                        *(reinterpret_cast<int *>(pre_ptr)) = index;
+                    }
                 }
             }
             return true;
@@ -201,26 +208,6 @@ namespace lab618
             }
         }
 
-        void check_exp()
-        {
-            block* pThisBlk = m_pBlocks;
-            T* pTmpElement = pThisBlk->pdata;
-            while(pThisBlk != nullptr)
-            {
-                for(int i =0; i < m_blkSize; ++i)
-                {
-                    if(pThisBlk->vec[i] == false)
-                        std::cout<< *(reinterpret_cast<int*>(pTmpElement)) << " ";
-                    else
-                        std::cout<< " __ ";
-                    ++pTmpElement;
-                }
-                pThisBlk = pThisBlk->pnext;
-                if(pThisBlk != nullptr)
-                    pTmpElement = pThisBlk->pdata;
-                std::cout << std::endl;
-            }
-        }
     private:
 
         // Создать новый блок данных. применяется в newObject
@@ -230,7 +217,6 @@ namespace lab618
             new_block->firstFreeIndex = 0;
             new_block->pnext = nullptr;
             new_block->usedCount = 0;
-            new_block->vec.resize(m_blkSize, false);
             new_block->pdata = reinterpret_cast<T*>(new char[sizeof(T)*m_blkSize]);
             T* buffer = new_block->pdata;
             for(int i = 0; i < m_blkSize; ++i) // заполняем int
@@ -248,12 +234,16 @@ namespace lab618
         // Освободить память блока данных. Применяется в clear
         void deleteBlock(block *p) // т.к. применятся в clear, который вызываем когда удаляем все, то занулять pnext не надо т.к. удаляем голову
         {
-            T *pThisBlk = p->pdata;
-            for(int i = 0; i < m_blkSize; ++i)
+            T *pTmpElement = p->pdata;
+            int index = 0;
+            int curFirst = p->firstFreeIndex;
+            while(index < m_blkSize && curFirst != -1)
             {
-                if((p->vec)[i] == true)
-                    DestructElements(pThisBlk);
-                ++pThisBlk;
+                if(index < curFirst)
+                    DestructElements(pTmpElement);
+                else
+                    curFirst = *(reinterpret_cast<int*>(p->pdata + curFirst));
+                ++index;
             }
             delete[] reinterpret_cast<char*> (p);
         }
