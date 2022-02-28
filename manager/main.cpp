@@ -1,51 +1,46 @@
 #include<iostream>
 #include "mm.h"
+#include <vector>
+#include <typeinfo>
 class s{
-private:
+public:
     int a=1;
     int b=1;
     char c= 'a';
 };
-void check_true_empty()
+std::ostream& operator << (std::ostream& ostrm, s& r) noexcept
 {
-    lab618::CMemoryManager<s> manager(7, true);
-    s** mass = new s* [5];
-    for(int i = 0; i < 5; ++i)
-    {
-        mass[i] = manager.newObject();
-        for (int i = 0; i < 6; ++i)
-            manager.newObject();
-    }
-    manager.check();
-    manager.check_exp();
-    for(int i = 0; i < 5; ++i)
-        manager.deleteObject(mass[i] + i);
-    for(int i = 0; i < 5; ++i)
-        manager.deleteObject(mass[i] + i + 1);
-    manager.check();
-    manager.check_exp();
+    ostrm << r.a << r.b << r.c;
+}
 
-}
-void check_false_empty()
+void test_(bool var)
 {
-    lab618::CMemoryManager<s> manager(7, false);
-    s** mass = new s* [5];
-    for(int i = 0; i < 5; ++i)
-    {
-        mass[i] = manager.newObject();
-        for (int i = 0; i < 6; ++i)
-            manager.newObject();
-    }
-    for(int i = 0; i < 5; ++i)
-    {
-        for (int j = 0; j < 7; ++j)
-            manager.deleteObject(mass[i] + j);
-    }
-    manager.check();
-    manager.check_exp();
+    lab618::CMemoryManager<s> manager(7, var);
+    std::vector<s*> vec;
+    for(int i = 0; i < 14; ++i)
+        vec.push_back(manager.newObject());
+    for(int i = 0; i < 14; ++i)
+        if (i % 2 == 0)
+            manager.deleteObject(vec[i]);
 }
+void test_complete_deleted(bool var)
+{
+    lab618::CMemoryManager<s> manager(7, var);
+    std::vector<s *> vec;
+    for(int i = 0; i < 14; ++i)
+        vec.push_back(manager.newObject());
+    for(int i = 0; i < 14; ++i)
+        manager.deleteObject(vec[i]);
+    for(int i = 0; i < 14; ++i)
+        std::cout << *vec[i] << " ";
+    std::cout << std::endl;
+}
+
+
 int main(void)
 {
-    check_true_empty();
-    check_false_empty();
+    test_(true);
+    test_complete_deleted(true);
+    test_complete_deleted(false);
+    test_(false); // падаем
 }

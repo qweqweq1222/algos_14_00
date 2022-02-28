@@ -163,13 +163,14 @@ namespace lab618
                 else // удаляемый после первого свободного и место есть
                 {
                     int index_prev = index - 1;
-                    int index_post = index + 1;
+                    int index_post = (index < (m_blkSize - 1)) ? (index + 1) : (m_blkSize - 1);
                     while(pThisBlk->vec[index_prev] == true && index_prev > 0)
                         --index_prev;
                     *((int*)(pThisBlk->pdata + index_prev)) = index;
+
                     while(pThisBlk->vec[index_post] == true && index_post < m_blkSize)
                         ++index_post;
-                    if(index_post < m_blkSize)
+                    if(index_post !=  m_blkSize - 1)
                         *(reinterpret_cast<int*>(pTmpElement)) = index_post;
                     else
                         *(reinterpret_cast<int*>(pTmpElement)) = -1;
@@ -198,25 +199,6 @@ namespace lab618
                 deleteBlock(pThisBlk);
                 pThisBlk = m_pBlocks;
             }
-        }
-
-        void check()
-        {
-            block* pThisBlk = m_pBlocks;
-            while(pThisBlk != nullptr)
-            {
-                for(int i =0; i < m_blkSize; ++i)
-                {
-                    if (pThisBlk->vec[i] == true)
-                        std::cout << " 1 ";
-                    else
-                        std::cout << " 0 ";
-                }
-                pThisBlk = pThisBlk->pnext;
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            std::cout << std::endl;
         }
 
         void check_exp()
@@ -257,7 +239,6 @@ namespace lab618
                     *(reinterpret_cast<int*>(buffer)) = -1;
                 else
                     *(reinterpret_cast<int*>(buffer)) = i + 1;
-                std::cout << *(reinterpret_cast<int*>(buffer)) << ' ';
                 ++buffer;
             }
             std::cout << std::endl;
