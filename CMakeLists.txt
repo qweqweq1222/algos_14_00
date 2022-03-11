@@ -1,7 +1,8 @@
+cmake_minimum_required(VERSION 3.10)
 
-cmake_minimum_required(VERSION 3.21)
-project(untitled)
+project(algorithms)
 
-set(CMAKE_CXX_STANDARD 14)
-
-add_executable(untitled main.cpp list.h doctest.h)
+include_directories(adds hash list manager)
+add_subdirectory(hash)
+add_subdirectory(list)
+add_subdirectory(manager)
