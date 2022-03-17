@@ -117,6 +117,16 @@ TEST_CASE("add")
 
         delete imposter;
     }
+	SUBCASE("remove from head")
+	{
+		Hash.clear();
+		for(int i = 0; i < HASH_SIZE; ++i)
+		{
+			my_struct* elem = new my_struct{GenerateName()[0], GenerateName()[1], 20 + rand() % 55, 160 + rand() % 25};
+			Hash.add(elem);
+		}
+		Hash.remove(my_struct{"Boris", "Bondareva", 40, 165});
+	}
 }
 
 

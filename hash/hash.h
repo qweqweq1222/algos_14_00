@@ -68,7 +68,11 @@ namespace lab618
 		Размер Хеш таблицы реализуем жестко — изменение размера таблицы в зависимости от числа элементов в контейнере не требуется.
 		Все создаваемые листики списков разрешения коллизий храним в менеджере памяти.
 		*/
-		CHash(int hashTableSize, int defaultBlockSize): m_tableSize(hashTableSize), m_Memory(6, true), m_pTable(new leaf* [hashTableSize]){}
+		CHash(int hashTableSize, int defaultBlockSize): m_tableSize(hashTableSize), m_Memory(6, true), m_pTable(new leaf* [hashTableSize])
+		{
+			for(int i = 0; i < hashTableSize; ++i)
+				m_pTable[i] = nullptr;
+		}
 		/**
 		Деструктор. Должен освобождать всю выделенную память
 		*/
@@ -84,36 +88,29 @@ namespace lab618
 		bool add(T* pElement)
 		{
 			int idx = 0;
-			leaf* m_pCurrentLeaf = findLeaf(pElement, idx);
-			bool check_;
 
-			if(m_pCurrentLeaf != nullptr)
+			if(findLeaf(pElement, idx) != nullptr) // элемент уже нашли
 				return false;
 
-			idx = HashFunc(pElement) % m_tableSize;
-			m_pCurrentLeaf = m_pTable[idx];
+			leaf* m_pCurrentList = m_pTable[idx];
 
-			if(m_pCurrentLeaf != nullptr)
-				check_ = m_pCurrentLeaf->pData == nullptr;
-
-			if(m_pCurrentLeaf != nullptr && !check_)
+			if(m_pCurrentList == nullptr) // добавляем голову
 			{
-				while(m_pCurrentLeaf->pnext != nullptr)
-					m_pCurrentLeaf = m_pCurrentLeaf->pnext;
-				m_pCurrentLeaf->pnext = m_Memory.newObject();
-				m_pCurrentLeaf->pnext->pData = pElement;
-				m_pCurrentLeaf->pnext->pnext = nullptr;
-			}
-			else if(m_pCurrentLeaf != nullptr && check_)
-			{
-				m_pTable[idx]->pnext = nullptr;
-				m_pTable[idx]->pData = pElement;
+				m_pCurrentList = m_Memory.newObject();
+				m_pTable[idx] = m_pCurrentList;
+				m_pCurrentList->pnext = nullptr;
+				m_pCurrentList->pData = pElement;
 			}
 			else
 			{
-				m_pTable[idx] = m_Memory.newObject();
-				m_pTable[idx]->pnext = nullptr;
-				m_pTable[idx]->pData = pElement;
+				while(m_pCurrentList->pnext != nullptr) // добавляем в конец
+					m_pCurrentList = m_pCurrentList->pnext;
+
+				m_pCurrentList->pnext = m_Memory.newObject();
+				leaf* m_pEnd = m_pCurrentList->pnext;
+
+				m_pEnd->pnext = nullptr;
+				m_pEnd->pData = pElement;
 			}
 			return true;
 		}
@@ -125,41 +122,31 @@ namespace lab618
 		{
 			int idx = 0;
 			leaf* m_pCurrentLeaf = findLeaf(pElement, idx);
-			bool check_;
 			if(m_pCurrentLeaf != nullptr)
-				check_ = m_pCurrentLeaf->pData == nullptr;
-
-			if(m_pCurrentLeaf != nullptr && !check_)
 			{
-				for(int i = 0; i < idx; ++i)
-					m_pCurrentLeaf = m_pCurrentLeaf->pnext;
 				m_pCurrentLeaf->pData = pElement;
 				return true;
 			}
 
-			idx = HashFunc(pElement) % m_tableSize;
-			m_pCurrentLeaf = m_pTable[idx];
-			if(m_pCurrentLeaf != nullptr)
-				check_ = m_pCurrentLeaf->pData == nullptr;
+			leaf* m_pCurrentList = m_pTable[idx];
 
-			if(m_pCurrentLeaf == nullptr)
+			if(m_pCurrentList == nullptr) // добавляем голову
 			{
-				m_pTable[idx] = m_Memory.newObject();
-				m_pTable[idx]->pnext = nullptr;
-				m_pTable[idx]->pData = pElement;
-			}
-			else if(check_)
-			{
-				m_pTable[idx]->pnext = nullptr;
-				m_pTable[idx]->pData = pElement;
+				m_pCurrentList = m_Memory.newObject();
+				m_pTable[idx] = m_pCurrentList;
+				m_pCurrentList->pnext = nullptr;
+				m_pCurrentList->pData = pElement;
 			}
 			else
 			{
-				while(m_pCurrentLeaf->pnext != nullptr)
-					m_pCurrentLeaf = m_pCurrentLeaf->pnext;
-				m_pCurrentLeaf->pnext = m_Memory.newObject();
-				m_pCurrentLeaf->pnext->pData = pElement;
-				m_pCurrentLeaf->pnext->pnext = nullptr;
+				while(m_pCurrentList->pnext != nullptr) // добавляем в конец
+					m_pCurrentList = m_pCurrentList->pnext;
+
+				m_pCurrentList->pnext = m_Memory.newObject();
+				leaf* m_pEnd = m_pCurrentList->pnext;
+
+				m_pEnd->pnext = nullptr;
+				m_pEnd->pData = pElement;
 			}
 			return false;
 		}
@@ -174,7 +161,7 @@ namespace lab618
 			leaf *m_pCurrentLeaf = findLeaf(el,idx);
 			if(m_pCurrentLeaf == nullptr)
 				return nullptr;
-			m_pCurrentLeaf = m_pCurrentLeaf + idx;
+
 			return m_pCurrentLeaf->pData;
 		}
 
@@ -200,24 +187,26 @@ namespace lab618
 			int idx = 0;
 			const T* el = &element;
 			leaf* m_pCurrentLeaf = findLeaf(el,idx);
-			leaf* m_pPrev = m_pCurrentLeaf;
 
 			if (m_pCurrentLeaf == nullptr) // если пытаемся удалить несуществующий
 				return false;
 
-			if(idx == 0) // если удаляем голову
+			leaf* m_pCurrentList = m_pTable[idx];
+			leaf* m_pPrev = m_pCurrentList;
+
+			if(m_pCurrentList == m_pCurrentLeaf) // проверяем не пытаемся ли удалить голову списка
 			{
-				idx = HashFunc(el) % m_tableSize;
-				m_pCurrentLeaf = m_pCurrentLeaf->pnext;
-				m_pTable[idx] = m_pCurrentLeaf;
+				m_pCurrentList = m_pCurrentList->pnext;
+				m_pTable[idx] = m_pCurrentList;
 				m_Memory.deleteObject(m_pPrev);
 			}
 			else
 			{
-				for(int i = 0; i < (idx - 1); ++i)
+				while(m_pPrev->pnext != m_pCurrentLeaf)
 					m_pPrev = m_pPrev->pnext;
-				m_pCurrentLeaf = m_pPrev->pnext;
-				m_pPrev->pnext = (m_pCurrentLeaf)->pnext;
+
+				m_pCurrentLeaf = m_pPrev->pnext; // следующий от m_pPrev -  будем его удалять
+				m_pPrev->pnext = (m_pCurrentLeaf)->pnext; // перевязываем указатели
 				m_Memory.deleteObject(m_pCurrentLeaf);
 			}
 			return true;
@@ -259,26 +248,17 @@ namespace lab618
 		*/
 		leaf *findLeaf(const T* pElement, int& idx)
 		{
-			int nrm_hash = HashFunc(pElement) % m_tableSize;
-			leaf* m_pCurrentLeaf = m_pTable[nrm_hash];
-			leaf* m_pCurrentElem = m_pCurrentLeaf;
-			idx = 0;
+			idx = HashFunc(pElement) % m_tableSize;
+			leaf* m_pCurrentElem = m_pTable[idx];
 
-			if(m_pCurrentLeaf == nullptr)
+			if(m_pCurrentElem == nullptr)
 				return nullptr;
 
-			else
+			while(m_pCurrentElem != nullptr)
 			{
-				if(m_pCurrentLeaf->pData != nullptr)
-				{
-					while(m_pCurrentElem != nullptr)
-					{
-						if(Compare(m_pCurrentElem->pData, pElement) == 0)
-							return m_pCurrentLeaf;
-						m_pCurrentElem = m_pCurrentElem->pnext;
-						++idx;
-					}
-				}
+				if(Compare(m_pCurrentElem->pData, pElement) == 0)
+					return m_pCurrentElem;
+				m_pCurrentElem = m_pCurrentElem->pnext;
 			}
 			return nullptr;
 		}
