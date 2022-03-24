@@ -1,0 +1,3 @@
+/home/anreydron/CLionProjects/private_sort/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/anreydron/CLionProjects/private_sort/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/anreydron/CLionProjects/private_sort/cmake-build-debug/CMakeFiles/private_sort.dir
