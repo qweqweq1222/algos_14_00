@@ -3,44 +3,45 @@
 
 #include "mm.h"
 
-namespace templates
+namespace lab618
 {
 
-    template <class T, int(*Compare)(const T *pElement, const T* pElement2) >
-    class CAVLTree
-    {
-    private:
-        struct leaf
-        {
+	template <class T, int(*Compare)(const T *pElement, const T* pElement2) >
+	class CAVLTree
+	{
+	private:
+		struct leaf
+		{
 			int height = 1;
-            T* pData;
-            leaf *pLeft = nullptr;
-            leaf *pRight = nullptr;
-            //int balanceFactor;
-        };
+			T* pData;
+			leaf *pLeft = nullptr;
+			leaf *pRight = nullptr;
+			//int balanceFactor;
+		};
 
-    public:
-        class CException
-        {
-        public:
-            CException()
-            {
-            }
-        };
+	public:
+		class CException
+		{
+		public:
+			CException()
+			{
+			}
+		};
 
-    public:
-        CAVLTree(): m_pRoot(nullptr), m_Memory(100, true) { };
+	public:
+		CAVLTree(): m_pRoot(nullptr), m_Memory(100, true) { };
 
-        virtual ~CAVLTree()
-        {
+		virtual ~CAVLTree()
+		{
 			clear();
 			m_Memory.deleteObject(m_pRoot);
 			m_pRoot = nullptr;
-        }
-        bool add(T* pElement)
+		}
+		bool add(T* pElement)
 		{
-			m_pRoot = Add(m_pRoot, pElement);
-			if(m_pRoot != nullptr)
+			bool check = false;
+			m_pRoot = Add(m_pRoot, pElement, check);
+			if(check)
 				return true;
 			return false;
 		}
@@ -54,23 +55,38 @@ namespace templates
 			}
 			return !add(pElement);
 		}
-		bool remove(const T& element) { return (Remove(m_pRoot, element)); }
+		bool remove(const T& element)
+		{
+			bool check = false;
+			leaf* buffer = Remove(m_pRoot, element, check);
+			if(check)
+			{
+				m_pRoot = buffer;
+				return true;
+			}
+			m_pRoot = buffer;
+			return false;
+		}
 		void clear()
 		{
 			Empty(m_pRoot);
 			m_pRoot = nullptr;
 			m_Memory.clear();
 		}
-        T* find(const T& pElement)
-        {
+		leaf* GetRoot()
+		{
+			return m_pRoot;
+		}
+		T* find(const T& pElement)
+		{
 			leaf *buffer = Find(m_pRoot, pElement);
 			if(buffer)
 				return buffer->pData;
 			return nullptr;
-        }
+		}
 		leaf* ReturnRoot() { return m_pRoot;}
 
-    private:
+	private:
 
 		int Height(leaf* p) { return p ? p->height : 0; }
 		int Factor(leaf* p) { return Height(p->pRight) - Height(p->pLeft); }
@@ -114,27 +130,29 @@ namespace templates
 			FixHeight(p);
 			return p;
 		}
-		leaf* Add(leaf* p, T* pElement)
+		leaf* Add(leaf* p, T* pElement, bool& is)
 		{
 			if(p == nullptr)
 			{
 				p =  m_Memory.newObject();
 				p->pData = pElement;
+				is = true;
 				return p;
 			}
 			if(Compare(pElement, p->pData) < 0)
 			{
-				p->pLeft = Add(p->pLeft, pElement);
+				p->pLeft = Add(p->pLeft, pElement, is);
 			}
 			else if (Compare(pElement, p->pData) > 0)
 			{
-				p->pRight = Add (p->pRight, pElement);
+				p->pRight = Add (p->pRight, pElement, is);
 			}
-			else
+			else // элемент уже есть
 			{
-				return nullptr;
+				return p;
 			}
-			return Balance(p);
+			p = Balance(p);
+			return p;
 		}
 		leaf* Balance(leaf* p)
 		{
@@ -143,13 +161,13 @@ namespace templates
 			{
 				if( Factor(p->pRight) < 0 )
 					p->pRight = RotateRight(p->pRight);
-				return RotateLeft(p);
+				p = RotateLeft(p);
 			}
 			if( Factor(p)==-2 )
 			{
 				if( Factor(p->pLeft) > 0  )
 					p->pLeft = RotateLeft(p->pLeft);
-				return RotateRight(p);
+				p = RotateRight(p);
 			}
 			return p;
 		}
@@ -168,6 +186,7 @@ namespace templates
 			{
 				return nullptr;
 			}
+			return nullptr;
 		}
 		leaf* Empty(leaf* p)
 		{
@@ -182,15 +201,16 @@ namespace templates
 			if( p->pLeft == 0 )
 				return p->pRight;
 			p->pLeft = RemoveMin(p->pLeft);
-			return Balance(p);
+			p = Balance(p);
+			return p;
 		}
-		leaf* Remove(leaf *p, const T& element)
+		leaf* Remove(leaf *p, const T& element, bool& is)
 		{
 			if( !p) return nullptr;
 			if( Compare(&element, p->pData) < 0 )
-				p->pLeft = Remove(p->pLeft,element);
+				p->pLeft = Remove(p->pLeft,element, is);
 			else if( Compare(&element, p->pData) > 0 )
-				p->pRight = Remove(p->pRight,element);
+				p->pRight = Remove(p->pRight,element, is);
 			else
 			{
 				leaf *buffer = p;
@@ -198,17 +218,19 @@ namespace templates
 				leaf* r = p->pRight;
 				p = nullptr;
 				m_Memory.deleteObject(buffer);
+				is = true;
 				if( !r ) return q;
 				leaf* min = FindMin(r);
 				min->pRight = RemoveMin(r);
 				min->pLeft = q;
-				return Balance(min);
+				min = Balance(min);
+				return min;
 			}
 		}
 
 		leaf* m_pRoot;
 		lab618::CMemoryManager<leaf> m_Memory;
-    };
+	};
 
 }; // namespace templates
 
