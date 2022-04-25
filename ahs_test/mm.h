@@ -117,73 +117,23 @@ namespace lab618
 		// Освободить элемент в менеджере
 		bool deleteObject(T* p)
 		{
-			block* pThisBlk = m_pBlocks;
-			T* pTmpElement = nullptr;
-			bool done = false;
-			int index = 0;
-			while(!done && pThisBlk != nullptr) // ищим где элемент
+			block* tmpBlock = m_pBlocks;
+			while (tmpBlock)
 			{
-				done = (pThisBlk->pdata <= p) && (p <= (pThisBlk->pdata + (m_blkSize - 1)));
-				if(done)
+				int diff = p - tmpBlock->pdata;
+				if (0 <= diff && diff < m_blkSize)
 				{
-					pTmpElement = pThisBlk->pdata;
-					while(pTmpElement != p)
-					{
-						++pTmpElement;
-						++index;
-					}
+					p->~T();
+					memset(reinterpret_cast<void*>(p), 0, sizeof(T));
+					int* pi = reinterpret_cast<int*>(p);
+					*pi = tmpBlock->firstFreeIndex;
+					tmpBlock->firstFreeIndex = diff;
+					tmpBlock->usedCount -= 1;
+					return true;
 				}
-				if(!done)
-					pThisBlk = pThisBlk->pnext;
+				tmpBlock = tmpBlock->pnext;
 			}
-			if(done == false) //пытаемся удалить несуществующий в менеджере элемент
-				return false;
-			else
-			{
-				DestructElements(pTmpElement);
-				--(pThisBlk->usedCount);
-
-				/* определяем что положить в качестве позиции следующего на выделенное место*/
-				if (index <= pThisBlk->firstFreeIndex && pThisBlk->firstFreeIndex != -1) // удаляемый до первого свободного и место было
-				{
-					*(reinterpret_cast<int*>(pTmpElement)) = pThisBlk->firstFreeIndex;
-					pThisBlk->firstFreeIndex = index;
-				}
-				else if(pThisBlk->firstFreeIndex == -1) // не было места до этого момента
-				{
-					*(reinterpret_cast<int*>(pTmpElement)) = -1;
-					pThisBlk->firstFreeIndex = index;
-				}
-				else // удаляемый после первого свободного и место есть
-				{
-					T* ptrPst = pThisBlk->pdata + pThisBlk->firstFreeIndex;
-					int idx = *(reinterpret_cast<int *>(ptrPst));
-					if(*(reinterpret_cast<int *>(ptrPst)) == -1)
-					{
-						*(reinterpret_cast<int *>(pTmpElement)) = -1;
-						*(reinterpret_cast<int *>(ptrPst)) = index;
-					}
-					else
-					{
-						T* pre_ptr  = ptrPst;
-						while(pTmpElement > ptrPst)
-						{
-							pre_ptr = ptrPst;
-							ptrPst = pThisBlk->pdata + idx;
-							idx = *(reinterpret_cast<int *>(ptrPst));
-							if(idx == -1 && pTmpElement > ptrPst)
-							{
-								*(reinterpret_cast<int *>(pTmpElement)) = -1;
-								*(reinterpret_cast<int *>(ptrPst)) = index;
-								return true;
-							}
-						}
-						*(reinterpret_cast<int *>(pTmpElement)) = *(reinterpret_cast<int *>(pre_ptr));
-						*(reinterpret_cast<int *>(pre_ptr)) = index;
-					}
-				}
-			}
-			return true;
+			return false;
 		}
 
 		// Очистка данных, зависит от m_isDeleteElementsOnDestruct

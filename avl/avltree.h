@@ -226,6 +226,8 @@ namespace lab618
 				min = Balance(min);
 				return min;
 			}
+			p = Balance(p);
+			return p;
 		}
 
 		leaf* m_pRoot;

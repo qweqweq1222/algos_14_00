@@ -6,7 +6,7 @@
 //
 // Copyrhs (c) 2016-2021 Viktor Kirilov
 //
-// Distributed under the MIT Software License
+// Distributed under the MIT Software LicenseRotateLe
 // See accompanying file LICENSE.txt or copy at
 // https://opensource.org/licenses/MIT
 //

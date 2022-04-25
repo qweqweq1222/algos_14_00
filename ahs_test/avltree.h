@@ -6,38 +6,38 @@
 namespace lab618
 {
 
-    template <class T, int(*Compare)(const T *pElement, const T* pElement2) >
-    class CAVLTree
-    {
-    private:
-        struct leaf
-        {
+	template <class T, int(*Compare)(const T *pElement, const T* pElement2) >
+	class CAVLTree
+	{
+	private:
+		struct leaf
+		{
 			int height = 1;
-            T* pData;
-            leaf *pLeft = nullptr;
-            leaf *pRight = nullptr;
-            //int balanceFactor;
-        };
+			T* pData;
+			leaf *pLeft = nullptr;
+			leaf *pRight = nullptr;
+			//int balanceFactor;
+		};
 
-    public:
-        class CException
-        {
-        public:
-            CException()
-            {
-            }
-        };
+	public:
+		class CException
+		{
+		public:
+			CException()
+			{
+			}
+		};
 
-    public:
-        CAVLTree(): m_pRoot(nullptr), m_Memory(100, true) { };
+	public:
+		CAVLTree(): m_pRoot(nullptr), m_Memory(1000, true) { };
 
-        virtual ~CAVLTree()
-        {
+		virtual ~CAVLTree()
+		{
 			clear();
 			m_Memory.deleteObject(m_pRoot);
 			m_pRoot = nullptr;
-        }
-        bool add(T* pElement)
+		}
+		bool add(T* pElement)
 		{
 			bool check = false;
 			m_pRoot = Add(m_pRoot, pElement, check);
@@ -76,16 +76,16 @@ namespace lab618
 		{
 			return m_pRoot;
 		}
-        T* find(const T& pElement)
-        {
+		T* find(const T& pElement)
+		{
 			leaf *buffer = Find(m_pRoot, pElement);
 			if(buffer)
 				return buffer->pData;
 			return nullptr;
-        }
+		}
 		leaf* ReturnRoot() { return m_pRoot;}
 
-    private:
+	private:
 
 		int Height(leaf* p) { return p ? p->height : 0; }
 		int Factor(leaf* p) { return Height(p->pRight) - Height(p->pLeft); }
@@ -234,7 +234,7 @@ namespace lab618
 		}
 		leaf* m_pRoot;
 		lab618::CMemoryManager<leaf> m_Memory;
-    };
+	};
 
 }; // namespace templates
 
