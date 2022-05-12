@@ -1,7 +1,7 @@
 #ifndef HASH_HEAD_H_2021_03_11
 #define HASH_HEAD_H_2021_03_11
 
-#include "manager.h" // необходимо использовать свой memorymanager
+#include "mm.h" // необходимо использовать свой memorymanager
 namespace lab618
 {
 	/**

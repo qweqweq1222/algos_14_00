@@ -19,8 +19,8 @@ std::mt19937 GENERATOR(RANDOM_DEVICE());
 const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
 const int MAX_LENGTH = 20;
 const int MIN_LENGTH = 7;
-int HASH_SIZE = 5000;
-int BLOCK_SIZE = 1000;
+int HASH_SIZE = 1000;
+int BLOCK_SIZE = 10000;
 void templates::compareSort(void** ppArray, int length, CompareSortType* pCompareFunc)
 {
 	void *buffer;
@@ -110,16 +110,16 @@ struct my_struct {
 		return CompareStr(last_name, other.last_name) < 0;
 	}
 };
-unsigned int HashFunc (const my_struct* element)
+unsigned int HashFuncStr (const std::string str)
 {
 	unsigned int hash = 5381;
-	std::string str;
-	for(int i = 0; i < (element->name.size() + element->last_name.size()); ++i)
-	{
-		str = element->name + element->last_name;
-		hash = (hash<<5) + hash + str[i];
-	}
+	for(int i = 0; i < str.size(); ++i)
+		hash = (hash<<5) + hash + (unsigned int)(str[i]);
 	return hash;
+}
+unsigned int HashFunc (const my_struct* element)
+{
+	return HashFuncStr(element->last_name) + HashFuncStr(element->name);
 }
 int counter = 100;
 int Compare(const my_struct* a, const my_struct* b) {
@@ -173,7 +173,7 @@ void Hash_Test(const int N,std::vector<my_struct>& data)
 	std::ofstream file;
 	file.open("/home/anreydron/TreeHashMassMapTests/data.csv",std::ios_base::app);
 
-	lab618::CHash<my_struct, HashFunc, Compare> Hash(HASH_SIZE, BLOCK_SIZE);
+	lab618::CHash<my_struct, HashFunc, Compare> Hash(N, BLOCK_SIZE);
 	auto start = std::chrono::steady_clock::now();
 	for(int i = 0; i < N; ++i)
 		if(!Hash.add(&data[i]))
@@ -299,7 +299,7 @@ int main(void)
 {
 	std::ofstream file;
 	file.open("/home/anreydron/TreeHashMassMapTests/data.csv",std::ios_base::app);
-	file << "type,N,exp,time\n";
+	file << "type_s,N,exp,time\n";
 	file.close();
 	for(int N = 100000; N <= 1000000; N+=100000)
 	{
