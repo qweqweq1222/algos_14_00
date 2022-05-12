@@ -91,27 +91,11 @@ namespace lab618
 
 			if(findLeaf(pElement, idx) != nullptr) // элемент уже нашли
 				return false;
-
-			leaf* m_pCurrentList = m_pTable[idx];
-
-			if(m_pCurrentList == nullptr) // добавляем голову
-			{
-				m_pCurrentList = m_Memory.newObject();
-				m_pTable[idx] = m_pCurrentList;
-				m_pCurrentList->pnext = nullptr;
-				m_pCurrentList->pData = pElement;
-			}
-			else
-			{
-				while(m_pCurrentList->pnext != nullptr) // добавляем в конец
-					m_pCurrentList = m_pCurrentList->pnext;
-
-				m_pCurrentList->pnext = m_Memory.newObject();
-				leaf* m_pEnd = m_pCurrentList->pnext;
-
-				m_pEnd->pnext = nullptr;
-				m_pEnd->pData = pElement;
-			}
+			leaf* p = m_Memory.newObject();
+			p->pnext = m_pTable[idx];
+			p->pData = pElement;
+			m_pTable[idx] = p;
+			mass[idx]++;
 			return true;
 		}
 		/**
@@ -128,29 +112,17 @@ namespace lab618
 				return true;
 			}
 
-			leaf* m_pCurrentList = m_pTable[idx];
-
-			if(m_pCurrentList == nullptr) // добавляем голову
-			{
-				m_pCurrentList = m_Memory.newObject();
-				m_pTable[idx] = m_pCurrentList;
-				m_pCurrentList->pnext = nullptr;
-				m_pCurrentList->pData = pElement;
-			}
-			else
-			{
-				while(m_pCurrentList->pnext != nullptr) // добавляем в конец
-					m_pCurrentList = m_pCurrentList->pnext;
-
-				m_pCurrentList->pnext = m_Memory.newObject();
-				leaf* m_pEnd = m_pCurrentList->pnext;
-
-				m_pEnd->pnext = nullptr;
-				m_pEnd->pData = pElement;
-			}
+			leaf* p = m_Memory.newObject();
+			p->pnext = m_pTable[idx];
+			p->pData = pElement;
+			m_pTable[idx] = p;
 			return false;
 		}
-
+		void CheckDev()
+		{
+			for(int i = 0; i < 5000; ++i)
+				std::cout << mass[i] << std::endl;
+		}
 		/**
 		Функция поиска элемента в Хеш-таблице. Возвращает указатель на данные. Если элемента не нашлось, то null.
 		Обратите внимание, что для поиска используется частично заполненный объект, т.е. В нем должны быть заполнены поля на основе которых рассчитывается хеш.*/
@@ -161,7 +133,6 @@ namespace lab618
 			leaf *m_pCurrentLeaf = findLeaf(el,idx);
 			if(m_pCurrentLeaf == nullptr)
 				return nullptr;
-
 			return m_pCurrentLeaf->pData;
 		}
 
@@ -184,31 +155,25 @@ namespace lab618
 
 		bool remove(const T& element)
 		{
-			int idx = 0;
-			const T* el = &element;
-			leaf* m_pCurrentLeaf = findLeaf(el,idx);
-
-			if (m_pCurrentLeaf == nullptr) // если пытаемся удалить несуществующий
+			unsigned int idx = HashFunc(&element) % m_tableSize;
+			leaf* tmpLeaf = m_pTable[idx];
+			leaf* preTmpLeaf = nullptr;
+			while (tmpLeaf) {
+				if (Compare(tmpLeaf->pData, &element) == 0) {
+					break;
+				}
+				preTmpLeaf = tmpLeaf;
+				tmpLeaf = tmpLeaf->pnext;
+			}
+			if (!tmpLeaf) {
 				return false;
-
-			leaf* m_pCurrentList = m_pTable[idx];
-			leaf* m_pPrev = m_pCurrentList;
-
-			if(m_pCurrentList == m_pCurrentLeaf) // проверяем не пытаемся ли удалить голову списка
-			{
-				m_pCurrentList = m_pCurrentList->pnext;
-				m_pTable[idx] = m_pCurrentList;
-				m_Memory.deleteObject(m_pPrev);
 			}
-			else
-			{
-				while(m_pPrev->pnext != m_pCurrentLeaf)
-					m_pPrev = m_pPrev->pnext;
-
-				m_pCurrentLeaf = m_pPrev->pnext; // следующий от m_pPrev -  будем его удалять
-				m_pPrev->pnext = (m_pCurrentLeaf)->pnext; // перевязываем указатели
-				m_Memory.deleteObject(m_pCurrentLeaf);
+			if (preTmpLeaf) {
+				preTmpLeaf->pnext = tmpLeaf->pnext;
+			} else {
+				m_pTable[idx] = tmpLeaf->pnext;
 			}
+			m_Memory.deleteObject(tmpLeaf);
 			return true;
 		}
 
@@ -296,6 +261,7 @@ namespace lab618
 		/**
 		Менеджер памяти, предназначен для хранение листов списков разрешения коллизий
 		*/
+		int mass[5000] = {0};
 		CMemoryManager<leaf> m_Memory;
 	};
 }; // namespace templates

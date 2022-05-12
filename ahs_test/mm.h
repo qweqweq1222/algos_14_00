@@ -46,8 +46,8 @@ namespace lab618
 		};
 
 	public:
-		CMemoryManager(int _default_block_size, bool isDeleteElementsOnDestruct = false): m_blkSize(_default_block_size),
-																						  m_isDeleteElementsOnDestruct(isDeleteElementsOnDestruct)
+		CMemoryManager(int _default_block_size = 1000, bool isDeleteElementsOnDestruct = false): m_blkSize(_default_block_size),
+																								 m_isDeleteElementsOnDestruct(isDeleteElementsOnDestruct)
 		{
 			m_pBlocks = nullptr;
 			m_pCurrentBlk = nullptr;
